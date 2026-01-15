@@ -1,0 +1,31 @@
+@import "tailwindcss";
+
+@theme {
+  --color-sakura-pink: #FFB7C5;
+  --color-sakura-light: #FFF0F5; /* LavenderBlush, very light pink for bg */
+  --color-sakura-dark: #FB6F92;
+  --color-baby-blue: #89CFF0;
+  --color-cream-yellow: #FFFDD0;
+  --color-warm-text: #333333;
+  --color-accent-gold: #FFD700;
+  
+  --font-sans: var(--font-geist-sans), system-ui, sans-serif;
+}
+
+:root {
+  --background: var(--color-sakura-light);
+  --foreground: var(--color-warm-text);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  font-size: 1.25rem; /* Base size slightly larger */
+  line-height: 1.6;
+}
+
+/* Custom utilities if needed */
+.text-xxl {
+    font-size: 3rem;
+}
