@@ -91,7 +91,13 @@ export default function ResultModal() {
                     <div className="flex-1 overflow-y-auto min-h-0 space-y-3 px-2 py-2 scrollbar-thin scrollbar-thumb-sakura-pink scrollbar-track-transparent">
                         {winners.map(w => (
                             <div key={w.id} className="bg-sakura-light/50 p-4 rounded-xl border-2 border-sakura-pink/30 flex items-center justify-between gap-4 shrink-0">
-                                <h3 className="text-3xl font-extrabold text-warm-text truncate flex-1 text-left">{w.name}</h3>
+                                <div className="flex-1 text-left min-w-0">
+                                    <h3 className="text-3xl font-extrabold text-warm-text truncate">{w.name}</h3>
+                                    <div className="flex items-center gap-2 mt-1 opacity-80">
+                                        <span className="text-sm font-bold bg-white/50 px-2 py-0.5 rounded text-gray-600 border border-sakura-pink/20">{w.department || '無部門'}</span>
+                                        <span className="text-sm font-mono text-gray-500">#{w.employeeId || '---'}</span>
+                                    </div>
+                                </div>
                                 <button
                                     onClick={() => handleRedraw(w.id)}
                                     className="flex items-center gap-1 px-3 py-1.5 bg-gray-100 text-gray-500 rounded-lg hover:bg-gray-200 transition-colors text-xs font-bold whitespace-nowrap shrink-0"
