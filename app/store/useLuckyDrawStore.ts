@@ -22,7 +22,7 @@ interface LuckyDrawState {
     participants: Participant[];
     prizes: Prize[];
     currentPrizeId: string | null;
-    mode: 'SLOT' | 'ROULETTE' | 'BATCH' | 'ID_DRAW';
+    mode: 'SLOT' | 'ROULETTE' | 'BATCH' | 'ID_DRAW' | 'DEPT_DRAW';
     isDrawing: boolean;
     isDecelerating: boolean; // Added missing type
     lastWinners: string[];
@@ -36,7 +36,7 @@ interface LuckyDrawState {
     addPrize: (name: string, count: number) => void;
     setCurrentPrize: (prizeId: string) => void;
     removePrize: (id: string) => void;
-    setMode: (mode: 'SLOT' | 'ROULETTE' | 'BATCH' | 'ID_DRAW') => void;
+    setMode: (mode: 'SLOT' | 'ROULETTE' | 'BATCH' | 'ID_DRAW' | 'DEPT_DRAW') => void;
     updatePrize: (id: string, updates: Partial<Prize>) => void;
 
     // Draw Logic
@@ -133,6 +133,13 @@ export const useLuckyDrawStore = create<LuckyDrawState>()(
                 }
 
                 // Randomly select winners
+                // EXCEPTION: For DEPT_DRAW, the component handles selection locally to ensure Dept constraint.
+                // We only signal deceleration here.
+                if (state.mode === 'DEPT_DRAW') {
+                    set({ isDecelerating: true });
+                    return;
+                }
+
                 const winnersToPick = Math.min(winnerCount, currentPrize.count - currentPrize.winners.length, eligible.length);
                 const newWinners: string[] = [];
 

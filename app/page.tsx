@@ -11,6 +11,7 @@ import SlotMachine from './components/SlotMachine';
 import Roulette from './components/Roulette';
 import BatchDraw from './components/BatchDraw';
 import IdDraw from './components/IdDraw';
+import DeptDraw from './components/DeptDraw';
 
 export default function Home() {
   const { mode, isDrawing, currentPrizeId, prizes } = useLuckyDrawStore();
@@ -39,6 +40,7 @@ export default function Home() {
           {mode === 'ROULETTE' && <Roulette />}
           {mode === 'BATCH' && <BatchDraw />}
           {mode === 'ID_DRAW' && <IdDraw />}
+          {mode === 'DEPT_DRAW' && <DeptDraw />}
 
           {!currentPrize && !isDrawing && (
             <div className="mt-10 text-gray-400 font-bold text-xl">
