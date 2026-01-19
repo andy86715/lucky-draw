@@ -4,9 +4,11 @@ import { useEffect, useState, useRef } from 'react';
 import { useLuckyDrawStore } from '../store/useLuckyDrawStore';
 import { motion } from 'framer-motion';
 import clsx from 'clsx';
+import { useSound } from '../context/SoundContext';
 
 export default function SlotMachine() {
     const { isDrawing, isDecelerating, participants, completeDraw } = useLuckyDrawStore();
+    const { playClick, playWin } = useSound();
     const [currentName, setCurrentName] = useState("READY");
     // const frameId = useRef<number | null>(null); // Unused
 
@@ -23,6 +25,7 @@ export default function SlotMachine() {
             const animate = () => {
                 const randomName = participants[Math.floor(Math.random() * participants.length)].name;
                 setCurrentName(randomName);
+                playClick(); // Sound effect
                 timeoutId = setTimeout(animate, 50); // Fast roll
             };
             animate();
@@ -41,13 +44,17 @@ export default function SlotMachine() {
                     // Keep showing random names
                     const randomName = participants[Math.floor(Math.random() * participants.length)].name;
                     setCurrentName(randomName);
+                    playClick(); // Sound effect
 
                     // Slow down
                     currentDelay *= 1.15; // 15% slower each tick
                     timeoutId = setTimeout(slowDown, currentDelay);
                 } else {
                     // STOP
-                    if (winner) setCurrentName(winner.name);
+                    if (winner) {
+                        setCurrentName(winner.name);
+                        playWin(); // Winner sound
+                    }
 
                     // Small pause before popup (like Roulette)
                     timeoutId = setTimeout(() => {
@@ -65,7 +72,7 @@ export default function SlotMachine() {
         }
 
         return () => clearTimeout(timeoutId);
-    }, [isDrawing, isDecelerating, participants, completeDraw]);
+    }, [isDrawing, isDecelerating, participants, completeDraw, playClick, playWin]);
 
     // Helper to determine font size class based on name length
     const getFontSizeClass = (name: string) => {

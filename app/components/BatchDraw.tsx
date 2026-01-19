@@ -4,8 +4,11 @@ import { useEffect, useState } from 'react';
 import { useLuckyDrawStore } from '../store/useLuckyDrawStore';
 import { motion, AnimatePresence } from 'framer-motion';
 
+import { useSound } from '../context/SoundContext';
+
 export default function BatchDraw() {
     const { isDrawing, isDecelerating, participants, currentPrizeId, prizes, lastWinners, completeDraw } = useLuckyDrawStore();
+    const { playClick, playWin } = useSound();
     const currentPrize = prizes.find(p => p.id === currentPrizeId);
 
     // Show a grid of random names/placeholders.
@@ -31,6 +34,7 @@ export default function BatchDraw() {
                     participants[Math.floor(Math.random() * participants.length)]?.name || '...'
                 );
                 setDisplayNames(randoms);
+                playClick(); // Click on shuffle
             }, 50);
         }
         // Mode 2: Deceleration
@@ -47,6 +51,7 @@ export default function BatchDraw() {
                         participants[Math.floor(Math.random() * participants.length)]?.name || '...'
                     );
                     setDisplayNames(randoms);
+                    playClick();
 
                     currentDelay *= 1.2; // Slow down
                     timeout = setTimeout(runDeceleration, currentDelay);
@@ -54,6 +59,7 @@ export default function BatchDraw() {
                     // STOP
                     const winnerNames = lastWinners.map(id => participants.find(p => p.id === id)?.name || 'Unknown');
                     setDisplayNames(winnerNames);
+                    playWin();
 
                     timeout = setTimeout(() => {
                         completeDraw();
@@ -72,7 +78,7 @@ export default function BatchDraw() {
             clearInterval(interval);
             clearTimeout(timeout);
         };
-    }, [isDrawing, isDecelerating, participants, lastWinners, completeDraw, currentPrize]);
+    }, [isDrawing, isDecelerating, participants, lastWinners, completeDraw, currentPrize, playClick, playWin]);
 
     return (
         <div className="relative flex justify-center items-center py-1 w-full">

@@ -1,30 +1,32 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useRef, useEffect } from 'react';
 import { useLuckyDrawStore } from '../store/useLuckyDrawStore';
 import confetti from 'canvas-confetti';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, RefreshCw, Check } from 'lucide-react';
+import { useSound } from '../context/SoundContext';
 
 export default function ResultModal() {
     const { currentPrizeId, prizes, participants, lastWinners, isDecelerating, clearLastWinners, redraw, startDraw } = useLuckyDrawStore();
+    const { playCongrats } = useSound();
 
     const show = lastWinners.length > 0 && !isDecelerating;
     const currentPrize = prizes.find(p => p.id === currentPrizeId);
     const winners = participants.filter(p => lastWinners.includes(p.id));
 
-    // Audio Ref
-    const winAudioRef = useRef<HTMLAudioElement | null>(null);
+    // Audio Ref - Removed in favor of context
+    // const winAudioRef = useRef<HTMLAudioElement | null>(null);
 
-    useEffect(() => {
-        // Initialize Audio
-        winAudioRef.current = new Audio('https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3'); // Fanfare/Cheer
-    }, []);
+    // useEffect(() => {
+    //     // Initialize Audio
+    //     winAudioRef.current = new Audio('https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3'); // Fanfare/Cheer
+    // }, []);
 
     useEffect(() => {
         if (show) {
             // Play Sound
-            winAudioRef.current?.play().catch(() => { });
+            playCongrats();
 
             // Confetti explosion
             const duration = 3000;

@@ -1,13 +1,17 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useLuckyDrawStore } from '../store/useLuckyDrawStore';
 import { motion, useAnimation, useMotionValue, animate } from 'framer-motion';
 
+import { useSound } from '../context/SoundContext';
+
 export default function Roulette() {
     const { isDrawing, isDecelerating, participants, lastWinners, completeDraw } = useLuckyDrawStore();
+    const { playClick, playWin } = useSound();
     // const controls = useAnimation(); // Removed
     const rotation = useMotionValue(0);
+    const lastSectionIndex = useRef<number>(-1); // Track last section for click sound
 
     // Config
     const COLORS = ['#FFAEBC', '#A0E7E5', '#B4F8C8', '#FBE7C6', '#FF9AA2', '#E2F0CB'];
@@ -39,6 +43,30 @@ export default function Roulette() {
     }, [participants, lastWinners, isDrawing]);
 
     const sliceAngle = 360 / (slices.length || 1);
+
+    // Track rotation for sound
+    useEffect(() => {
+        const unsubscribe = rotation.on("change", (latest) => {
+            const normalizedRot = (latest % 360 + 360) % 360; // 0-360
+            // The pointer is at 0 (top).
+            // Slice index at pointer = floor((360 - Rot) / SliceAngle) % Count
+            // Wait, rotation is clockwise.
+            // If wheel rotates +10deg, the slice UNDER the pointer moves LEFT.
+            // Pointer is fixed at top.
+            // Effective angle at pointer = (0 - rotation) % 360
+
+            // Simplified: Just detect change in (Rotation / SliceAngle) floor
+            const currentSection = Math.floor(latest / sliceAngle);
+            if (currentSection !== lastSectionIndex.current) {
+                if (lastSectionIndex.current !== -1) {
+                    playClick();
+                }
+                lastSectionIndex.current = currentSection;
+            }
+        });
+        return () => unsubscribe();
+    }, [rotation, sliceAngle, playClick]);
+
 
     useEffect(() => {
         let playback: any;
@@ -95,6 +123,7 @@ export default function Roulette() {
                     duration: duration,
                     ease: "easeOut", // Standard easeOut (cubic) starts at 2*avg_vel, giving us ~360 deg/s start
                     onComplete: () => {
+                        playWin();
                         setTimeout(() => completeDraw(), 500);
                     }
                 });
@@ -106,7 +135,7 @@ export default function Roulette() {
         return () => {
             if (playback) playback.stop();
         };
-    }, [isDrawing, isDecelerating, lastWinners, slices, rotation, completeDraw, sliceAngle]);
+    }, [isDrawing, isDecelerating, lastWinners, slices, rotation, completeDraw, sliceAngle, playWin]);
 
     const radius = 180; // SVG radius
 
