@@ -21,6 +21,7 @@ export default function ControlPanel() {
     const [newPrizeCount, setNewPrizeCount] = useState(1);
     const [newPartName, setNewPartName] = useState('');
     const [newPartDept, setNewPartDept] = useState('');
+    const [newPartId, setNewPartId] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
     const [filterType, setFilterType] = useState<string>('ALL');
 
@@ -38,7 +39,6 @@ export default function ControlPanel() {
         setMode,
         currentPrizeId,
         setCurrentPrize,
-        startDraw
     } = useLuckyDrawStore();
 
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -67,9 +67,22 @@ export default function ControlPanel() {
     };
 
     const handleAddParticipant = () => {
-        if (!newPartName) return;
-        addParticipant(newPartName, '');
+        if (!newPartName || !newPartId) {
+            alert('請輸入姓名和員工編號');
+            return;
+        }
+        // Validation: Letter + 4 digits or 5 digits
+        const idRegex = /^[A-Za-z]\d{4}$/;
+        const idRegex2 = /^\d{5}$/;
+        if (!idRegex.test(newPartId) && !idRegex2.test(newPartId)) {
+            alert('員工編號格式錯誤！必須為 1 英文 + 4 數字 (例如: A1234) 或 5 數字 (例如: 12345)');
+            return;
+        }
+
+        addParticipant(newPartName, newPartDept, newPartId);
         setNewPartName('');
+        setNewPartDept('');
+        setNewPartId('');
     };
 
     const handleLoadDefault = () => {
@@ -77,6 +90,7 @@ export default function ControlPanel() {
             setParticipants(defaultParticipants.map(p => ({
                 ...p,
                 id: crypto.randomUUID(),
+                department: p.department || 'General',
                 isWinner: false,
                 disqualified: false
             })));
@@ -98,6 +112,7 @@ export default function ControlPanel() {
             return {
                 '姓名': p.name,
                 '部門': p.department,
+                '員編': p.employeeId,
                 '獎項': prize?.name || 'Unknown'
             };
         });
@@ -108,6 +123,7 @@ export default function ControlPanel() {
         const all = participants.map(p => ({
             '姓名': p.name,
             '部門': p.department,
+            '員編': p.employeeId,
             '狀態': p.isWinner ? '中獎' : p.disqualified ? '取消資格' : '未中獎',
             '獲得獎項': prizes.find(pz => pz.id === p.wonPrizeId)?.name || ''
         }));
@@ -318,12 +334,25 @@ export default function ControlPanel() {
                                 <div className="w-px h-10 bg-gray-200 mx-2" />
 
                                 {/* Manual Add */}
-                                <div className="flex gap-2 w-1/3">
+                                <div className="flex gap-2 w-full md:w-auto">
                                     <input
                                         value={newPartName}
                                         onChange={e => setNewPartName(e.target.value)}
                                         placeholder="姓名"
-                                        className="flex-1 px-4 py-2 rounded-xl bg-gray-50 border border-transparent focus:bg-white focus:border-sakura-pink outline-none"
+                                        className="w-24 md:w-32 px-4 py-2 rounded-xl bg-gray-50 border border-transparent focus:bg-white focus:border-sakura-pink outline-none"
+                                    />
+                                    <input
+                                        value={newPartDept}
+                                        onChange={e => setNewPartDept(e.target.value)}
+                                        placeholder="部門"
+                                        className="w-24 md:w-32 px-4 py-2 rounded-xl bg-gray-50 border border-transparent focus:bg-white focus:border-sakura-pink outline-none"
+                                    />
+                                    <input
+                                        value={newPartId}
+                                        onChange={e => setNewPartId(e.target.value)}
+                                        placeholder="員編"
+                                        className="w-28 md:w-36 px-4 py-2 rounded-xl bg-gray-50 border border-transparent focus:bg-white focus:border-sakura-pink outline-none uppercase"
+                                        maxLength={5}
                                     />
                                     <button
                                         onClick={handleAddParticipant}
@@ -355,6 +384,8 @@ export default function ControlPanel() {
                                                 <thead className="sticky top-0 bg-white border-b border-gray-100 text-gray-500 font-bold text-base z-10">
                                                     <tr>
                                                         <th className="p-4">姓名</th>
+                                                        <th className="p-4">部門</th>
+                                                        <th className="p-4">員編</th>
                                                         <th className="p-4">狀態</th>
                                                         <th className="p-4 text-right">操作</th>
                                                     </tr>
@@ -362,12 +393,14 @@ export default function ControlPanel() {
                                                 <tbody>
                                                     {filteredParticipants.length === 0 && (
                                                         <tr>
-                                                            <td colSpan={3} className="p-8 text-center text-gray-400 text-lg">此條件下沒有名單</td>
+                                                            <td colSpan={5} className="p-8 text-center text-gray-400 text-lg">此條件下沒有名單</td>
                                                         </tr>
                                                     )}
                                                     {filteredParticipants.map(p => (
                                                         <tr key={p.id} className="border-b border-gray-50 hover:bg-sakura-light/20 transition-colors">
                                                             <td className="p-4 text-xl font-bold text-gray-800">{p.name}</td>
+                                                            <td className="p-4 text-gray-600">{p.department}</td>
+                                                            <td className="p-4 text-gray-600 font-mono text-lg">{p.employeeId}</td>
                                                             <td className="p-4">
                                                                 {p.isWinner && (
                                                                     <span className="bg-sakura-pink text-white text-base px-3 py-1.5 rounded-full mr-2 shadow-sm font-bold">

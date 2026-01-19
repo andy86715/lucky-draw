@@ -4,6 +4,7 @@ import { persist } from 'zustand/middleware';
 export interface Participant {
     id: string;
     name: string;
+    employeeId: string;
     department: string;
     isWinner: boolean;
     wonPrizeId?: string;
@@ -29,7 +30,7 @@ interface LuckyDrawState {
 
     // Actions
     setParticipants: (data: Omit<Participant, 'isWinner' | 'wonPrizeId' | 'disqualified'>[]) => void;
-    addParticipant: (name: string, department: string) => void;
+    addParticipant: (name: string, department: string, employeeId: string) => void;
     removeParticipant: (id: string) => void;
 
     addPrize: (name: string, count: number) => void;
@@ -63,13 +64,14 @@ export const useLuckyDrawStore = create<LuckyDrawState>()(
                 participants: data.map(p => ({ ...p, isWinner: false, disqualified: false }))
             }),
 
-            addParticipant: (name, department) => set((state) => ({
+            addParticipant: (name, department, employeeId) => set((state) => ({
                 participants: [
                     ...state.participants,
                     {
                         id: crypto.randomUUID(),
                         name,
                         department,
+                        employeeId,
                         isWinner: false,
                         disqualified: false
                     }

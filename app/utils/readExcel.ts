@@ -4,6 +4,7 @@ export interface ImportedParticipant {
     id: string;
     name: string;
     department: string;
+    employeeId: string;
 }
 
 export const readExcel = async (file: File): Promise<ImportedParticipant[]> => {
@@ -14,8 +15,7 @@ export const readExcel = async (file: File): Promise<ImportedParticipant[]> => {
                 const data = e.target?.result;
                 const workbook = XLSX.read(data, { type: 'binary' });
                 const sheetName = workbook.SheetNames[0];
-                const sheet = workbook.Sheets[sheetName];
-                const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 }); // Import as array of arrays
+                const jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { header: 1 }); // Import as array of arrays
 
                 // Simple heuristic to find headers
                 const rows = jsonData as any[][];
@@ -28,10 +28,9 @@ export const readExcel = async (file: File): Promise<ImportedParticipant[]> => {
                 // Otherwise assume it's data
                 let headerRowIndex = 0;
                 const headerRow = rows[0].map((cell: any) => String(cell).toLowerCase());
-
                 let nameIdx = headerRow.findIndex(h => h.includes('name') || h.includes('姓名'));
                 let deptIdx = headerRow.findIndex(h => h.includes('dept') || h.includes('department') || h.includes('部門') || h.includes('單位'));
-                let idIdx = headerRow.findIndex(h => h.includes('id') || h.includes('工號'));
+                let idIdx = headerRow.findIndex(h => h.includes('id') || h.includes('員編'));
 
                 // Fallback: If no headers found, assume Col 0 = ID/Name, Col 1 = Name/Dept
                 if (nameIdx === -1) {
@@ -52,12 +51,13 @@ export const readExcel = async (file: File): Promise<ImportedParticipant[]> => {
                     if (!name) continue;
 
                     const dept = deptIdx !== -1 && row[deptIdx] ? String(row[deptIdx]).trim() : 'Unknown';
-                    const id = idIdx !== -1 && row[idIdx] ? String(row[idIdx]).trim() : crypto.randomUUID();
+                    const empId = idIdx !== -1 && row[idIdx] ? String(row[idIdx]).trim() : `UNK${Math.floor(Math.random() * 10000)}`;
 
                     participants.push({
-                        id,
+                        id: crypto.randomUUID(),
                         name,
-                        department: dept
+                        department: dept,
+                        employeeId: empId
                     });
                 }
 
