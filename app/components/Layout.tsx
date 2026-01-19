@@ -53,7 +53,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
             <header className="relative z-10 py-6 text-center">
                 <h1 className="text-4xl md:text-5xl font-extrabold text-sakura-dark drop-shadow-sm tracking-tight">
-                    🌸 溫馨好孕 2026 尾牙 🌸
+                    🌸 亞東婦產部 2026 尾牙 🌸
                 </h1>
                 <p className="text-sakura-pink font-bold mt-2 text-xl">OB/GYN Department Lucky Draw</p>
             </header>
@@ -63,7 +63,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             </main>
 
             <footer className="fixed bottom-4 right-4 z-10 opacity-60 hover:opacity-100 transition-opacity">
-                <a href="https://github.com/andy86715" target="_blank" rel="noreferrer" className="flex items-center gap-2 text-xs text-warm-text bg-white/50 px-3 py-1 rounded-full backdrop-blur-sm">
+                <a href="https://github.com/andy86715/lucky-draw" target="_blank" rel="noreferrer" className="flex items-center gap-2 text-xs text-warm-text bg-white/50 px-3 py-1 rounded-full backdrop-blur-sm">
                     <Github size={14} />
                     <span>Open Source</span>
                 </a>

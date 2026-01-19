@@ -21,8 +21,9 @@ interface LuckyDrawState {
     participants: Participant[];
     prizes: Prize[];
     currentPrizeId: string | null;
-    mode: 'SLOT' | 'ROULETTE' | 'GARAPON' | 'BATCH';
+    mode: 'SLOT' | 'ROULETTE' | 'BATCH';
     isDrawing: boolean;
+    isDecelerating: boolean; // Added missing type
     lastWinners: string[];
     history: string[]; // Log of past draws
 
@@ -34,7 +35,7 @@ interface LuckyDrawState {
     addPrize: (name: string, count: number) => void;
     setCurrentPrize: (prizeId: string) => void;
     removePrize: (id: string) => void;
-    setMode: (mode: 'SLOT' | 'ROULETTE' | 'GARAPON' | 'BATCH') => void;
+    setMode: (mode: 'SLOT' | 'ROULETTE' | 'BATCH') => void;
     updatePrize: (id: string, updates: Partial<Prize>) => void;
 
     // Draw Logic

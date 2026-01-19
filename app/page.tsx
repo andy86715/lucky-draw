@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Layout from './components/Layout';
 import ControlPanel from './components/ControlPanel';
 import ResultModal from './components/ResultModal';
-import Garapon from './components/Garapon';
+// import Garapon from './components/Garapon'; // Removed
 import { useLuckyDrawStore } from './store/useLuckyDrawStore';
 import clsx from 'clsx';
 import SlotMachine from './components/SlotMachine';
@@ -36,11 +36,6 @@ export default function Home() {
           {/* Visuals based on Mode */}
           {mode === 'SLOT' && <SlotMachine />}
           {mode === 'ROULETTE' && <Roulette />}
-          {mode === 'GARAPON' && (
-            <div className="relative pt-10 pb-20">
-              <Garapon />
-            </div>
-          )}
           {mode === 'BATCH' && <BatchDraw />}
 
           {!currentPrize && !isDrawing && (
