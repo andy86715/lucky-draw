@@ -75,7 +75,7 @@ export default function BatchDraw() {
     }, [isDrawing, isDecelerating, participants, lastWinners, completeDraw, currentPrize]);
 
     return (
-        <div className="relative flex justify-center items-center py-10 w-full">
+        <div className="relative flex justify-center items-center py-1 w-full">
             {/* Machine Body */}
             <div className="bg-gradient-to-br from-sakura-pink to-sakura-dark p-8 rounded-[3rem] shadow-[0_20px_50px_rgba(0,0,0,0.3)] border-b-[12px] border-r-[12px] border-sakura-dark/50 relative max-w-5xl w-full">
 
@@ -94,7 +94,7 @@ export default function BatchDraw() {
                 {/* Screen Bezel */}
                 <div className="bg-gradient-to-b from-yellow-100 to-yellow-500 p-4 rounded-[2rem] shadow-inner relative">
                     {/* Inner Screen */}
-                    <div className="bg-white rounded-[1.5rem] min-h-[400px] flex items-center justify-center overflow-hidden shadow-[inset_0_10px_20px_rgba(0,0,0,0.1)] border-4 border-gray-200 relative p-6">
+                    <div className="bg-white rounded-[1.5rem] min-h-[300px] flex items-center justify-center overflow-hidden shadow-[inset_0_10px_20px_rgba(0,0,0,0.1)] border-4 border-gray-200 relative p-6">
 
                         {/* Glass Reflection primitive */}
                         <div className="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-white/40 to-transparent pointer-events-none z-10" />

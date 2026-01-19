@@ -19,19 +19,19 @@ export default function Home() {
     <Layout>
       <div className="flex-1 flex flex-col items-center justify-center w-full max-w-6xl mx-auto relative">
 
+        {/* Prize Label - Positioned Above Stage */}
+        {currentPrize ? (
+          <div className="bg-sakura-pink text-white px-8 py-3 rounded-full text-2xl font-bold shadow-lg mb-6 z-10 transition-all border-4 border-white">
+            🏆 {currentPrize.name} <span className="text-lg ml-2 opacity-90">(共 {currentPrize.count} 名)</span>
+          </div>
+        ) : (
+          <div className="bg-gray-300 text-white px-8 py-3 rounded-full text-2xl font-bold mb-6 z-10 transition-all border-4 border-white">
+            請先選擇一個獎項
+          </div>
+        )}
+
         {/* Stage Area */}
         <div className="w-full aspect-video max-h-[600px] bg-white/80 backdrop-blur-md rounded-[3rem] shadow-2xl border-8 border-white flex flex-col items-center justify-center p-10 relative overflow-hidden">
-
-          {/* Prize Label */}
-          {currentPrize ? (
-            <div className="bg-sakura-pink text-white px-8 py-2 rounded-full text-2xl font-bold shadow-md mb-8 z-10 transition-all">
-              🏆 {currentPrize.name} ({currentPrize.count} Winners)
-            </div>
-          ) : (
-            <div className="bg-gray-300 text-white px-8 py-2 rounded-full text-2xl font-bold mb-8 z-10 transition-all">
-              Select a Prize to Start
-            </div>
-          )}
 
           {/* Visuals based on Mode */}
           {mode === 'SLOT' && <SlotMachine />}

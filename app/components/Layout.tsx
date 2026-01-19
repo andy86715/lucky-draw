@@ -53,7 +53,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
             <header className="relative z-10 py-6 text-center">
                 <h1 className="text-4xl md:text-5xl font-extrabold text-sakura-dark drop-shadow-sm tracking-tight">
-                    🌸 亞東婦產部 2026 尾牙 🌸
+                    🌸 亞東婦產部 2026 尾牙抽獎 🌸
                 </h1>
                 <p className="text-sakura-pink font-bold mt-2 text-xl">OB/GYN Department Lucky Draw</p>
             </header>

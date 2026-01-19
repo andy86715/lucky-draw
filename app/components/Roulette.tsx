@@ -148,14 +148,14 @@ export default function Roulette() {
                                     strokeWidth="2"
                                 />
                                 <text
-                                    x={radius + (radius * 0.7) * Math.cos(((i + 0.5) * 360 / slices.length) * Math.PI / 180)}
-                                    y={radius + (radius * 0.7) * Math.sin(((i + 0.5) * 360 / slices.length) * Math.PI / 180)}
+                                    x={radius + (radius * 0.85) * Math.cos(((i + 0.5) * 360 / slices.length) * Math.PI / 180)}
+                                    y={radius + (radius * 0.85) * Math.sin(((i + 0.5) * 360 / slices.length) * Math.PI / 180)}
                                     fill="#333"
-                                    fontSize="14"
+                                    fontSize={slices.length > 12 ? "12" : "16"}
                                     fontWeight="bold"
-                                    textAnchor="middle"
+                                    textAnchor="end"
                                     alignmentBaseline="middle"
-                                    transform={`rotate(${((i + 0.5) * 360 / slices.length) + 90}, ${radius + (radius * 0.7) * Math.cos(((i + 0.5) * 360 / slices.length) * Math.PI / 180)}, ${radius + (radius * 0.7) * Math.sin(((i + 0.5) * 360 / slices.length) * Math.PI / 180)})`}
+                                    transform={`rotate(${((i + 0.5) * 360 / slices.length)}, ${radius + (radius * 0.85) * Math.cos(((i + 0.5) * 360 / slices.length) * Math.PI / 180)}, ${radius + (radius * 0.85) * Math.sin(((i + 0.5) * 360 / slices.length) * Math.PI / 180)})`}
                                 >
                                     {slice.name}
                                 </text>
