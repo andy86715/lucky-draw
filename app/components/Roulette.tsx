@@ -83,51 +83,42 @@ export default function Roulette() {
 
             if (winnerIndex !== -1) {
                 const currentRot = rotation.get();
-                // Avoid modulus here to keep the total rotation increasing monotonically for simple physics logic
-                // But we need to find the next target angle that aligns.
-
-                // Target Angle relative to wheel start (0) needs to be at -90 (270)
-                // Slice Center = winnerIndex * sliceAngle + (sliceAngle / 2)
-
-                // We want: (FinalRot % 360) + SliceCenter = 270 (or -90)
-                // (or + k*360)
-
-                // Let's normalize sliceCenter to 0-360
+                // 1. Calculate where the winner slice currently IS.
+                // Slice Center (Relative to 0/Right)
                 const sliceCenter = winnerIndex * sliceAngle + (sliceAngle / 2);
 
-                // Required wheel rotation (mod 360) to place sliceCenter at 270:
-                // Rot + SliceCenter = 270
-                // Rot = 270 - SliceCenter
+                // 2. We want this slice center to land at 270 (Top).
+                // Target Rotation: Rot + sliceCenter = 270 + k*360
+                // Rot = 270 - sliceCenter ...
 
-                let targetMod = (270 - sliceCenter) % 360;
-                if (targetMod < 0) targetMod += 360;
+                // Effective target mod 360
+                let targetRotationMod = (270 - sliceCenter) % 360;
+                if (targetRotationMod < 0) targetRotationMod += 360;
 
-                // Helper to get next target greater than current
-                const currentMod = currentRot % 360;
-                // Dist to next target
-                let dist = targetMod - currentMod;
-                if (dist <= 0) dist += 360;
+                // 3. Find distance from current rotation to target
+                const currentRotationMod = currentRot % 360;
+                let distanceToTarget = targetRotationMod - currentRotationMod;
 
-                // Add 3 full spins for braking
-                const totalDist = dist + (360 * 3);
-                const finalTarget = currentRot + totalDist;
+                // Ensure we always spin forward (positive distance)
+                if (distanceToTarget <= 0) distanceToTarget += 360;
 
-                // Dynamic Duration Calculation
-                // We want initial velocity (v0) to match the spin speed (360 deg/s).
-                // For easeOut (Quadratic/Cubic), Average Velocity = v0 / 2.
-                // So Average Velocity should be 180 deg/s.
-                // Duration = Distance / Average Velocity = totalDist / 180.
-                const duration = totalDist / 180;
+                // 4. Add extra spins for dramatic effect
+                const extraSpins = 360 * 5; // 5 full spins
+                const totalRotation = distanceToTarget + extraSpins;
+                const finalTarget = currentRot + totalRotation;
+
+                const duration = totalRotation / 200; // Constant deceleration speed factor
 
                 playback = animate(rotation, finalTarget, {
                     duration: duration,
-                    ease: "easeOut", // Standard easeOut (cubic) starts at 2*avg_vel, giving us ~360 deg/s start
+                    ease: "circOut", // Stronger deceleration curve
                     onComplete: () => {
                         playWin();
                         setTimeout(() => completeDraw(), 500);
                     }
                 });
             } else {
+                // If visual mismatch (winner not in slices), just end
                 completeDraw();
             }
         }
@@ -137,7 +128,7 @@ export default function Roulette() {
         };
     }, [isDrawing, isDecelerating, lastWinners, slices, rotation, completeDraw, sliceAngle, playWin]);
 
-    const radius = 180; // SVG radius
+    const radius = 230; // SVG radius for 500x500 container
 
     const getSectorPath = (index: number, total: number) => {
         const startAngle = (index * 360) / total;
@@ -156,7 +147,7 @@ export default function Roulette() {
     };
 
     return (
-        <div className="relative w-[400px] h-[400px] flex items-center justify-center">
+        <div className="relative w-[500px] h-[500px] flex items-center justify-center">
             {/* Pointer */}
             <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-6 z-20">
                 <div className="w-0 h-0 border-l-[20px] border-l-transparent border-r-[20px] border-r-transparent border-t-[40px] border-t-red-500 drop-shadow-md" />
@@ -180,7 +171,7 @@ export default function Roulette() {
                                     x={radius + (radius * 0.85) * Math.cos(((i + 0.5) * 360 / slices.length) * Math.PI / 180)}
                                     y={radius + (radius * 0.85) * Math.sin(((i + 0.5) * 360 / slices.length) * Math.PI / 180)}
                                     fill="#333"
-                                    fontSize={slices.length > 12 ? "12" : "16"}
+                                    fontSize={slices.length > 14 ? "16" : "24"}
                                     fontWeight="bold"
                                     textAnchor="end"
                                     alignmentBaseline="middle"
@@ -199,7 +190,7 @@ export default function Roulette() {
             </motion.div>
 
             {/* Center Boss */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-white rounded-full shadow-inner border-4 border-gray-100 flex items-center justify-center font-bold text-sakura-pink">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 bg-white rounded-full shadow-inner border-4 border-gray-100 flex items-center justify-center font-bold text-sakura-pink text-xl">
                 LUCKY
             </div>
         </div>
