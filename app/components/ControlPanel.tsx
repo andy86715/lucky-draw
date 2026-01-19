@@ -13,6 +13,7 @@ type Tab = 'CONTROL' | 'PRIZES' | 'PARTICIPANTS' | 'SYSTEM';
 
 export default function ControlPanel() {
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const prizeFileInputRef = useRef<HTMLInputElement>(null); // Added this
     const [isOpen, setIsOpen] = useState(true);
     const [activeTab, setActiveTab] = useState<Tab>('CONTROL');
 
@@ -41,21 +42,68 @@ export default function ControlPanel() {
         setCurrentPrize,
     } = useLuckyDrawStore();
 
-    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'PARTICIPANTS' | 'PRIZES') => {
         const file = e.target.files?.[0];
         if (!file) return;
 
         setIsProcessing(true);
         try {
-            const data = await readExcel(file);
-            setParticipants(data);
-            alert(`成功匯入 ${data.length} 筆名單！`);
+            const result = await readExcel(file);
+            let msg: string[] = [];
+
+            if (type === 'PARTICIPANTS') {
+                if (result.participants.length > 0) {
+                    setParticipants(result.participants);
+                    msg.push(`成功匯入 ${result.participants.length} 筆名單`);
+                } else {
+                    alert('檔案中未發現有效名單資料');
+                    return;
+                }
+            } else if (type === 'PRIZES') {
+                if (result.prizes.length > 0) {
+                    // Overwrite prizes: Clear first then add
+                    useLuckyDrawStore.setState({ prizes: [] });
+                    result.prizes.forEach(p => addPrize(p.name, p.count));
+                    msg.push(`成功匯入 ${result.prizes.length} 筆獎項 (已覆蓋原有獎項)`);
+                } else {
+                    alert('檔案中未發現有效獎項資料');
+                    return;
+                }
+            }
+
+            if (msg.length > 0) alert(msg.join('，'));
+
         } catch (err) {
             alert('匯入失敗，請檢查檔案格式。');
             console.error(err);
         } finally {
             setIsProcessing(false);
             if (fileInputRef.current) fileInputRef.current.value = '';
+            if (prizeFileInputRef.current) prizeFileInputRef.current.value = '';
+        }
+    };
+
+    const handleDownloadTemplate = (type: 'PARTICIPANTS' | 'PRIZES') => {
+        const wb = XLSX.utils.book_new();
+
+        if (type === 'PARTICIPANTS') {
+            const listData = [
+                ['姓名', '部門', '員工編號'],
+                ['王大明', '4B', 'F8291'],
+                ['李小花', '嬰兒室', '91039'],
+            ];
+            const wsList = XLSX.utils.aoa_to_sheet(listData);
+            XLSX.utils.book_append_sheet(wb, wsList, "名單 (Participants)");
+            XLSX.writeFile(wb, '名單範本_Participants.xlsx');
+        } else {
+            const prizeData = [
+                ['獎項名稱', '名額'],
+                ['頭獎 - 東京雙人來回機票', 1],
+                ['二獎 - Dyson 吹風機', 2],
+            ];
+            const wsPrizes = XLSX.utils.aoa_to_sheet(prizeData);
+            XLSX.utils.book_append_sheet(wb, wsPrizes, "獎項 (Prizes)");
+            XLSX.writeFile(wb, '獎項範本_Prizes.xlsx');
         }
     };
 
@@ -229,32 +277,59 @@ export default function ControlPanel() {
                     {/* --- TAB: PRIZES --- */}
                     {activeTab === 'PRIZES' && (
                         <div className="flex flex-col h-full gap-6">
-                            <div className="flex gap-4 items-end bg-white p-4 rounded-2xl shadow-sm">
-                                <div className="flex-1 space-y-1">
-                                    <label className="text-xs font-bold text-gray-500">獎項名稱</label>
-                                    <input
-                                        value={newPrizeName}
-                                        onChange={e => setNewPrizeName(e.target.value)}
-                                        placeholder="例如: 院長加碼獎"
-                                        className="w-full px-4 py-2 rounded-xl bg-gray-50 border border-transparent focus:bg-white focus:border-sakura-pink outline-none"
-                                    />
-                                </div>
-                                <div className="w-24 space-y-1">
-                                    <label className="text-xs font-bold text-gray-500">名額</label>
-                                    <input
-                                        type="number"
-                                        min={1}
-                                        value={newPrizeCount}
-                                        onChange={e => setNewPrizeCount(Number(e.target.value))}
-                                        className="w-full px-4 py-2 rounded-xl bg-gray-50 border border-transparent focus:bg-white focus:border-sakura-pink outline-none text-center"
-                                    />
-                                </div>
+                            {/* Toolbar (Import/Export + Add) */}
+                            <div className="flex gap-4 items-end bg-white p-4 rounded-2xl shadow-sm flex-wrap">
+                                {/* Import/Export Group */}
                                 <button
-                                    onClick={handleAddPrize}
-                                    className="bg-sakura-pink text-white p-3 rounded-xl hover:bg-sakura-dark transition-colors"
+                                    onClick={() => prizeFileInputRef.current?.click()}
+                                    className="px-4 py-2 bg-sakura-light text-sakura-dark font-bold rounded-xl hover:bg-sakura-pink hover:text-white transition-colors flex items-center gap-2"
                                 >
-                                    <Plus />
+                                    <Upload size={18} /> 匯入 Excel
                                 </button>
+                                <button
+                                    onClick={() => handleDownloadTemplate('PRIZES')}
+                                    className="px-4 py-2 bg-blue-50 text-blue-600 font-bold rounded-xl hover:bg-blue-500 hover:text-white transition-colors flex items-center gap-2"
+                                >
+                                    <FileDown size={18} /> 下載範本
+                                </button>
+                                <input
+                                    type="file"
+                                    accept=".xlsx,.xls,.csv"
+                                    ref={prizeFileInputRef}
+                                    onChange={(e) => handleUpload(e, 'PRIZES')}
+                                    className="hidden"
+                                />
+
+                                <div className="w-px h-10 bg-gray-200 mx-2" />
+
+                                {/* Manual Add Group (Moved here to match Participants layout) */}
+                                <div className="flex-1 flex gap-2 w-full md:w-auto items-end">
+                                    <div className="flex-1 space-y-1">
+                                        <label className="text-xs font-bold text-gray-500 ml-1">獎項名稱</label>
+                                        <input
+                                            value={newPrizeName}
+                                            onChange={e => setNewPrizeName(e.target.value)}
+                                            placeholder="例如: 院長加碼獎"
+                                            className="w-full px-4 py-2 rounded-xl bg-gray-50 border border-transparent focus:bg-white focus:border-sakura-pink outline-none"
+                                        />
+                                    </div>
+                                    <div className="w-24 space-y-1">
+                                        <label className="text-xs font-bold text-gray-500 ml-1">名額</label>
+                                        <input
+                                            type="number"
+                                            min={1}
+                                            value={newPrizeCount}
+                                            onChange={e => setNewPrizeCount(Number(e.target.value))}
+                                            className="w-full px-4 py-2 rounded-xl bg-gray-50 border border-transparent focus:bg-white focus:border-sakura-pink outline-none text-center"
+                                        />
+                                    </div>
+                                    <button
+                                        onClick={handleAddPrize}
+                                        className="bg-sakura-pink text-white p-3 rounded-xl hover:bg-sakura-dark transition-colors mb-[1px]" // align adjustment
+                                    >
+                                        <Plus size={20} />
+                                    </button>
+                                </div>
                             </div>
 
                             <div className="flex-1 overflow-y-auto bg-white rounded-2xl shadow-sm p-2">
@@ -295,7 +370,6 @@ export default function ControlPanel() {
                     )}
 
                     {/* --- TAB: PARTICIPANTS --- */}
-                    {/* --- TAB: PARTICIPANTS --- */}
                     {activeTab === 'PARTICIPANTS' && (
                         <div className="flex flex-col h-full gap-6">
                             <div className="flex gap-4 items-end bg-white p-4 rounded-2xl shadow-sm flex-wrap">
@@ -305,11 +379,17 @@ export default function ControlPanel() {
                                 >
                                     <Upload size={18} /> 匯入 Excel
                                 </button>
+                                <button
+                                    onClick={() => handleDownloadTemplate('PARTICIPANTS')}
+                                    className="px-4 py-2 bg-blue-50 text-blue-600 font-bold rounded-xl hover:bg-blue-500 hover:text-white transition-colors flex items-center gap-2"
+                                >
+                                    <FileDown size={18} /> 下載範本
+                                </button>
                                 <input
                                     type="file"
                                     accept=".xlsx,.xls,.csv"
                                     ref={fileInputRef}
-                                    onChange={handleFileUpload}
+                                    onChange={(e) => handleUpload(e, 'PARTICIPANTS')}
                                     className="hidden"
                                 />
 
