@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useLuckyDrawStore } from '../store/useLuckyDrawStore';
 import { motion } from 'framer-motion';
+import clsx from 'clsx';
 
 export default function SlotMachine() {
     const { isDrawing, isDecelerating, participants, completeDraw } = useLuckyDrawStore();
@@ -66,10 +67,18 @@ export default function SlotMachine() {
         return () => clearTimeout(timeoutId);
     }, [isDrawing, isDecelerating, participants, completeDraw]);
 
+    // Helper to determine font size class based on name length
+    const getFontSizeClass = (name: string) => {
+        const len = name.length;
+        if (len <= 3) return "text-[5rem] md:text-[7rem]";
+        if (len === 4) return "text-[4rem] md:text-[6rem]";
+        return "text-[3rem] md:text-[4.5rem]";
+    };
+
     return (
-        <div className="relative flex justify-center items-center py-10">
+        <div className="relative flex justify-center items-center py-10 w-full">
             {/* Machine Body */}
-            <div className="bg-gradient-to-br from-sakura-pink to-sakura-dark p-8 rounded-[3rem] shadow-[0_20px_50px_rgba(0,0,0,0.3)] border-b-[12px] border-r-[12px] border-sakura-dark/50 relative max-w-4xl w-full">
+            <div className="bg-gradient-to-br from-sakura-pink to-sakura-dark p-8 rounded-[3rem] shadow-[0_20px_50px_rgba(0,0,0,0.3)] border-b-[12px] border-r-[12px] border-sakura-dark/50 relative max-w-2xl w-full">
 
                 {/* Decorative Top Lights */}
                 <div className="flex justify-center gap-4 mb-6">
@@ -95,7 +104,10 @@ export default function SlotMachine() {
                         <div className="text-center overflow-hidden z-0 w-full">
                             <motion.div
                                 // Removed animate={scale} to stop flashing as requested
-                                className="text-[5rem] md:text-[7rem] font-black text-sakura-dark leading-tight whitespace-nowrap px-4"
+                                className={clsx(
+                                    "font-black text-sakura-dark leading-tight whitespace-nowrap px-4 transition-all duration-100",
+                                    getFontSizeClass(currentName)
+                                )}
                             >
                                 {currentName}
                             </motion.div>
