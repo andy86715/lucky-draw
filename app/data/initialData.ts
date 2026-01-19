@@ -19,6 +19,16 @@ export const defaultParticipants = [
     { name: '陳冠宇', department: '醫師', employeeId: '81029' },
     { name: '楊宗翰', department: '技術員', employeeId: 'F2913' },
     { name: '賴欣怡', department: '嬰兒室', employeeId: '94821' },
+    { name: '許志豪', department: '4B', employeeId: '87261' },
+    { name: '郭雅婷', department: '嬰兒室', employeeId: 'F5678' },
+    { name: '曾建良', department: '手術室', employeeId: '92345' },
+    { name: '洪秀英', department: '專科護理師', employeeId: '86543' },
+    { name: '邱國強', department: '醫師', employeeId: 'F1122' },
+    { name: '馬小雲', department: '門診', employeeId: '99887' },
+    { name: '廖思涵', department: '技術員', employeeId: '84567' },
+    { name: '周杰倫', department: '4D', employeeId: 'F9999' },
+    { name: '蔡依林', department: '產房', employeeId: '96666' },
+    { name: '蕭敬騰', department: '4B', employeeId: '88888' },
 ];
 
 export const defaultPrizes = [
