@@ -148,7 +148,7 @@ export default function ControlPanel() {
             </div>
 
             {/* Tabs Header */}
-            <div className="flex border-b border-gray-100/50 px-6 pt-2 overflow-x-auto">
+            <div className="flex shrink-0 border-b border-gray-100/50 px-6 pt-2 overflow-x-auto relative z-10">
                 {[
                     { id: 'CONTROL', label: '抽獎模式', icon: MonitorPlay },
                     { id: 'PRIZES', label: '獎項管理', icon: Gift },
@@ -184,7 +184,7 @@ export default function ControlPanel() {
                                     1. 選擇模式
                                 </label>
                                 <div className="flex gap-3">
-                                    {(['SLOT', 'BATCH', 'ROULETTE'] as const).map((m) => (
+                                    {(['SLOT', 'BATCH', 'ROULETTE', 'ID_DRAW'] as const).map((m) => (
                                         <button
                                             key={m}
                                             onClick={() => setMode(m)}
@@ -196,9 +196,9 @@ export default function ControlPanel() {
                                             )}
                                         >
                                             <span className="text-2xl">
-                                                {m === 'ROULETTE' ? '🎡' : m === 'SLOT' ? '🎰' : '🎰👥'}
+                                                {m === 'ROULETTE' ? '🎡' : m === 'SLOT' ? '🎰' : m === 'BATCH' ? '🎰👥' : '🔢'}
                                             </span>
-                                            {m === 'ROULETTE' ? '轉盤' : m === 'SLOT' ? '拉霸機' : '多人拉霸機'}
+                                            {m === 'ROULETTE' ? '轉盤' : m === 'SLOT' ? '拉霸機' : m === 'BATCH' ? '多人拉霸機' : '員編抽獎'}
                                         </button>
                                     ))}
                                 </div>

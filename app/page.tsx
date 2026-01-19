@@ -10,6 +10,7 @@ import clsx from 'clsx';
 import SlotMachine from './components/SlotMachine';
 import Roulette from './components/Roulette';
 import BatchDraw from './components/BatchDraw';
+import IdDraw from './components/IdDraw';
 
 export default function Home() {
   const { mode, isDrawing, currentPrizeId, prizes } = useLuckyDrawStore();
@@ -37,6 +38,7 @@ export default function Home() {
           {mode === 'SLOT' && <SlotMachine />}
           {mode === 'ROULETTE' && <Roulette />}
           {mode === 'BATCH' && <BatchDraw />}
+          {mode === 'ID_DRAW' && <IdDraw />}
 
           {!currentPrize && !isDrawing && (
             <div className="mt-10 text-gray-400 font-bold text-xl">
