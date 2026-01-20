@@ -34,11 +34,12 @@ export default function DeptDraw() {
     const animationRef = useRef<number | null>(null);
     const lastClickTimeRef = useRef(0);
 
-    // Get unique departments with eligible candidates
+    // Get weighted departments (one entry per eligible participant)
+    // This ensures that departments with more people have a higher chance of being picked.
     const availableDepts = useMemo(() => {
         const eligible = participants.filter(p => !p.isWinner && !p.disqualified);
-        const depts = new Set(eligible.map(p => p.department));
-        return Array.from(depts);
+        // Map each person to their department (allowing duplicates)
+        return eligible.map(p => p.department);
     }, [participants]);
 
     // Get candidates for the selected department
