@@ -1,15 +1,18 @@
 'use client';
 
-import { useRef, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useLuckyDrawStore } from '../store/useLuckyDrawStore';
 import confetti from 'canvas-confetti';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, RefreshCw, Check } from 'lucide-react';
 import { useSound } from '../context/SoundContext';
+import ConfirmModal from './ConfirmModal';
 
 export default function ResultModal() {
     const { currentPrizeId, prizes, participants, lastWinners, isDecelerating, clearLastWinners, redraw, startDraw } = useLuckyDrawStore();
     const { playCongrats } = useSound();
+
+    const [confirmData, setConfirmData] = useState<{ winnerId: string; winnerName: string } | null>(null);
 
     const show = lastWinners.length > 0 && !isDecelerating;
     const currentPrize = prizes.find(p => p.id === currentPrizeId);
@@ -58,17 +61,24 @@ export default function ResultModal() {
 
     if (!show || !currentPrize) return null;
 
-    const handleRedraw = (winnerId: string) => {
-        if (confirm(`Are you sure you want to Re-draw? \n${winnerId} will be disqualified.`)) {
-            redraw(currentPrize.id, winnerId);
+    const handleRedrawClick = (winnerId: string, winnerName: string) => {
+        setConfirmData({ winnerId, winnerName });
+    };
+
+    const handleConfirmRedraw = () => {
+        if (confirmData) {
+            redraw(currentPrize.id, confirmData.winnerId);
             clearLastWinners();
             startDraw();
+            setConfirmData(null);
         }
     };
 
     return (
         <AnimatePresence>
+            {/* Main Result Modal */}
             <motion.div
+                key="result-modal"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -99,7 +109,7 @@ export default function ResultModal() {
                                     </div>
                                 </div>
                                 <button
-                                    onClick={() => handleRedraw(w.id)}
+                                    onClick={() => handleRedrawClick(w.id, w.name)}
                                     className="flex items-center gap-1 px-3 py-1.5 bg-gray-100 text-gray-500 rounded-lg hover:bg-gray-200 transition-colors text-xs font-bold whitespace-nowrap shrink-0"
                                 >
                                     <RefreshCw size={14} /> 重抽
@@ -120,6 +130,20 @@ export default function ResultModal() {
 
                 </motion.div>
             </motion.div>
+
+            {/* Confirm Redraw Modal */}
+            {confirmData && (
+                <ConfirmModal
+                    isOpen={!!confirmData}
+                    title="確定要重抽嗎？"
+                    message={`這將會取消 ${confirmData.winnerName} 的得獎資格，並立即重新抽出一位幸運兒！`}
+                    confirmText="確定重抽"
+                    cancelText="取消"
+                    type="danger"
+                    onConfirm={handleConfirmRedraw}
+                    onCancel={() => setConfirmData(null)}
+                />
+            )}
         </AnimatePresence>
     );
 }
