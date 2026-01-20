@@ -9,38 +9,30 @@ import { useSound } from '../context/SoundContext';
 export default function Roulette() {
     const { isDrawing, isDecelerating, participants, lastWinners, completeDraw } = useLuckyDrawStore();
     const { playClick, playWin } = useSound();
-    // const controls = useAnimation(); // Removed
     const rotation = useMotionValue(0);
     const lastSectionIndex = useRef<number>(-1); // Track last section for click sound
 
     // Config
     const COLORS = ['#FFAEBC', '#A0E7E5', '#B4F8C8', '#FBE7C6', '#FF9AA2', '#E2F0CB'];
-
-    // ... (data prep logic same as before)
     const eligible = participants.filter(p => !p.isWinner && !p.disqualified);
-    const displayCount = Math.min(eligible.length, 24);
-
     const [slices, setSlices] = useState<{ id: string, name: string, color: string }[]>([]);
 
     useEffect(() => {
-        if (!isDrawing) {
+        // Update slices whenever participants change, OR when we start drawing (to lock in the pool)
+        // If we heavily rely on "isDrawing" to lock the pool, we should be careful.
+        // But usually typically we want to see the wheel update as we add people UNTIL we start drawing.
+        if (!isDrawing && !isDecelerating) {
             let pool = [...eligible];
-            const winnerId = lastWinners[0];
-            if (winnerId) {
-                const winner = participants.find(p => p.id === winnerId);
-                if (winner && !pool.find(p => p.id === winnerId)) {
-                    pool.unshift(winner);
-                }
-            }
-            if (pool.length > displayCount) pool = pool.slice(0, displayCount);
+            // No slicing limit anymore
             setSlices(pool.map((p, i) => ({
                 id: p.id,
                 name: p.name,
                 color: COLORS[i % COLORS.length]
             })));
         }
+        // If isDrawing or isDecelerating, we keep the current slices (don't update mid-spin)
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [participants, lastWinners, isDrawing]);
+    }, [participants, isDrawing, isDecelerating]);
 
     const sliceAngle = 360 / (slices.length || 1);
 
@@ -171,7 +163,12 @@ export default function Roulette() {
                                     x={radius + (radius * 0.85) * Math.cos(((i + 0.5) * 360 / slices.length) * Math.PI / 180)}
                                     y={radius + (radius * 0.85) * Math.sin(((i + 0.5) * 360 / slices.length) * Math.PI / 180)}
                                     fill="#333"
-                                    fontSize={slices.length > 14 ? "16" : "24"}
+                                    fontSize={
+                                        slices.length > 100 ? "8" :
+                                            slices.length > 60 ? "10" :
+                                                slices.length > 30 ? "12" :
+                                                    slices.length > 14 ? "16" : "24"
+                                    }
                                     fontWeight="bold"
                                     textAnchor="end"
                                     alignmentBaseline="middle"
