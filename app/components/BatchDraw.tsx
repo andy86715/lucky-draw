@@ -63,7 +63,7 @@ export default function BatchDraw() {
 
                     timeout = setTimeout(() => {
                         completeDraw();
-                    }, 500); // 0.5s pause before popup
+                    }, 2000); // 2s pause before popup
                 }
             };
             runDeceleration();

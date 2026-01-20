@@ -59,7 +59,7 @@ export default function SlotMachine() {
                     // Small pause before popup (like Roulette)
                     timeoutId = setTimeout(() => {
                         completeDraw();
-                    }, 500);
+                    }, 1000);
                 }
             };
             slowDown();
