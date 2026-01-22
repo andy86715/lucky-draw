@@ -9,7 +9,7 @@ import { useLuckyDrawStore } from './store/useLuckyDrawStore';
 import clsx from 'clsx';
 import SlotMachine from './components/SlotMachine';
 import Roulette from './components/Roulette';
-import BatchDraw from './components/BatchDraw'; // Kept imports to avoid breaking if file exists
+// import BatchDraw from './components/BatchDraw'; // Removed
 import IdDraw from './components/IdDraw';
 import DeptDraw from './components/DeptDraw';
 
@@ -38,7 +38,6 @@ export default function Home() {
           {/* Visuals based on Mode */}
           {mode === 'SLOT' && <SlotMachine />}
           {mode === 'ROULETTE' && <Roulette />}
-          {mode === 'BATCH' && <BatchDraw />}
           {mode === 'ID_DRAW' && <IdDraw />}
           {mode === 'DEPT_DRAW' && <DeptDraw />}
 
@@ -61,10 +60,6 @@ export default function Home() {
                 } else if (mode === 'SLOT') {
                   const count = useLuckyDrawStore.getState().slotDrawCount;
                   useLuckyDrawStore.getState().endDraw(count);
-                } else if (mode === 'BATCH') {
-                  // Fallback for logic safety
-                  const remaining = currentPrize.count - currentPrize.winners.length;
-                  useLuckyDrawStore.getState().endDraw(remaining);
                 } else {
                   // Other Modes: Draw ONE at a time
                   useLuckyDrawStore.getState().endDraw(1);
@@ -89,9 +84,7 @@ export default function Home() {
                 ? `點擊停止抽出 ${useLuckyDrawStore.getState().idDrawCount} 位`
                 : mode === 'SLOT'
                   ? `點擊停止抽出 ${useLuckyDrawStore.getState().slotDrawCount} 位`
-                  : mode === 'BATCH'
-                    ? "點擊停止抽出所有剩餘"
-                    : "點擊停止抽出一位"}
+                  : "點擊停止抽出一位"}
             </div>
           )}
         </div>
