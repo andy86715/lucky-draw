@@ -50,7 +50,7 @@ interface LuckyDrawState {
     endDraw: (winnerCount?: number) => void; // Calculates winners, enters deceleration
     completeDraw: () => void; // Finishes deceleration, shows result
     clearLastWinners: () => void;
-    redraw: (prizeId: string, previousWinnerId: string) => void; // Added missing action definition
+    redraw: (prizeId: string, previousWinnerIds: string[]) => void; // Updated interface
     reset: () => void; // Added missing action definition
 }
 
@@ -192,23 +192,26 @@ export const useLuckyDrawStore = create<LuckyDrawState>()(
 
             completeDraw: () => set({ isDrawing: false, isDecelerating: false }),
 
-            redraw: (prizeId, previousWinnerId) => {
+            redraw: (prizeId, previousWinnerIds) => { // Changed previousWinnerId to previousWinnerIds (array)
                 set((state) => {
                     const prize = state.prizes.find(p => p.id === prizeId);
                     if (!prize) return state;
 
+                    // Ensure array
+                    const idsToRedraw = Array.isArray(previousWinnerIds) ? previousWinnerIds : [previousWinnerIds];
+
                     return {
                         participants: state.participants.map(p =>
-                            p.id === previousWinnerId
-                                ? { ...p, isWinner: false, wonPrizeId: undefined, disqualified: true } // DQ the previous winner
+                            idsToRedraw.includes(p.id)
+                                ? { ...p, isWinner: false, wonPrizeId: undefined, disqualified: true } // DQ the previous winners
                                 : p
                         ),
                         prizes: state.prizes.map(p =>
                             p.id === prizeId
-                                ? { ...p, winners: p.winners.filter(id => id !== previousWinnerId) }
+                                ? { ...p, winners: p.winners.filter(id => !idsToRedraw.includes(id)) }
                                 : p
                         ),
-                        history: [...state.history, `Redraw triggered for ${prize.name}. Disqualified ${previousWinnerId}`]
+                        history: [...state.history, `Redraw triggered for ${prize.name}. Disqualified ${idsToRedraw.length} participants.`]
                     };
                 });
             },
