@@ -53,8 +53,31 @@ export default function ControlPanel() {
 
             if (type === 'PARTICIPANTS') {
                 if (result.participants.length > 0) {
-                    setParticipants(result.participants);
-                    msg.push(`成功匯入 ${result.participants.length} 筆名單`);
+                    // Deduplicate logic
+                    const seenIds = new Set<string>();
+                    const uniqueParticipants = [];
+                    let duplicateCount = 0;
+
+                    for (const p of result.participants) {
+                        const normalizedId = p.employeeId.trim().toUpperCase();
+                        if (seenIds.has(normalizedId)) {
+                            duplicateCount++;
+                        } else {
+                            seenIds.add(normalizedId);
+                            uniqueParticipants.push(p);
+                        }
+                    }
+
+                    if (uniqueParticipants.length > 0) {
+                        setParticipants(uniqueParticipants);
+                        msg.push(`成功匯入 ${uniqueParticipants.length} 筆名單`);
+                        if (duplicateCount > 0) {
+                            msg.push(`已自動過濾 ${duplicateCount} 筆重複資料`);
+                        }
+                    } else {
+                        alert('檔案中未發現有效名單資料 (或全部為重複)');
+                        return;
+                    }
                 } else {
                     alert('檔案中未發現有效名單資料');
                     return;
@@ -124,6 +147,12 @@ export default function ControlPanel() {
         const idRegex2 = /^\d{5}$/;
         if (!idRegex.test(newPartId) && !idRegex2.test(newPartId)) {
             alert('員工編號格式錯誤！必須為 1 英文 + 4 數字 (例如: A1234) 或 5 數字 (例如: 12345)');
+            return;
+        }
+
+        // Check for duplicates
+        if (participants.some(p => p.employeeId.trim().toUpperCase() === newPartId.trim().toUpperCase())) {
+            alert(`員工編號 ${newPartId} 已存在！`);
             return;
         }
 
