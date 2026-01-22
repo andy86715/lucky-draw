@@ -232,7 +232,7 @@ export default function ControlPanel() {
                                     1. 選擇模式
                                 </label>
                                 <div className="flex gap-3">
-                                    {(['SLOT', 'BATCH', 'ROULETTE', 'ID_DRAW', 'DEPT_DRAW'] as const).map((m) => (
+                                    {(['SLOT', 'ROULETTE', 'ID_DRAW', 'DEPT_DRAW'] as const).map((m) => (
                                         <button
                                             key={m}
                                             onClick={() => setMode(m)}
@@ -244,9 +244,9 @@ export default function ControlPanel() {
                                             )}
                                         >
                                             <span className="text-2xl">
-                                                {m === 'ROULETTE' ? '🎡' : m === 'SLOT' ? '🎰' : m === 'BATCH' ? '🎰👥' : m === 'ID_DRAW' ? '🔢' : '🏢'}
+                                                {m === 'ROULETTE' ? '🎡' : m === 'SLOT' ? '🎰' : m === 'ID_DRAW' ? '🔢' : '🏢'}
                                             </span>
-                                            {m === 'ROULETTE' ? '轉盤' : m === 'SLOT' ? '拉霸機' : m === 'BATCH' ? '多人拉霸機' : m === 'ID_DRAW' ? '員編抽獎' : '部門抽獎'}
+                                            {m === 'ROULETTE' ? '轉盤' : m === 'SLOT' ? '拉霸機' : m === 'ID_DRAW' ? '員編抽獎' : '部門抽獎'}
                                         </button>
                                     ))}
                                 </div>

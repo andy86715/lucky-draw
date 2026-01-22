@@ -31,6 +31,9 @@ interface LuckyDrawState {
     idDrawCount: number;
     setIdDrawCount: (count: number) => void;
 
+    slotDrawCount: number;
+    setSlotDrawCount: (count: number) => void;
+
     // Actions
     setParticipants: (data: Omit<Participant, 'isWinner' | 'wonPrizeId' | 'disqualified'>[]) => void;
     addParticipant: (name: string, department: string, employeeId: string) => void;
@@ -65,6 +68,9 @@ export const useLuckyDrawStore = create<LuckyDrawState>()(
 
             idDrawCount: 1,
             setIdDrawCount: (count) => set({ idDrawCount: count }),
+
+            slotDrawCount: 1,
+            setSlotDrawCount: (count) => set({ slotDrawCount: count }),
 
             setParticipants: (data) => set({
                 participants: data.map(p => ({ ...p, isWinner: false, disqualified: false }))
