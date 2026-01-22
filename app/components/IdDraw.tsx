@@ -15,40 +15,79 @@ export default function IdDraw() {
         lastWinners,
         completeDraw,
         currentPrizeId,
-        prizes
+        prizes,
+        idDrawCount,
+        setIdDrawCount
     } = useLuckyDrawStore();
 
     const { playClick, playWin } = useSound();
 
-    // 5 slots state
-    const [slots, setSlots] = useState<string[]>(['?', '?', '?', '?', '?']);
-    // Track which slot is currently "locked"
-    const [lockedCount, setLockedCount] = useState(0);
+    // Current Prize Info
+    const currentPrize = prizes.find(p => p.id === currentPrizeId);
+
+    // Calculate dynamic limits
+    const remainingCount = currentPrize ? (currentPrize.count - currentPrize.winners.length) : 0;
+    const eligibleCount = participants.filter(p => !p.isWinner && !p.disqualified).length;
+    // Cap manual selection at min(4, remaining, eligible)
+    const maxSelectable = Math.max(1, Math.min(4, remainingCount, eligibleCount));
+
+    // Ensure valid idDrawCount when constraints change
+    useEffect(() => {
+        if (idDrawCount > maxSelectable) {
+            setIdDrawCount(maxSelectable);
+        }
+    }, [maxSelectable, idDrawCount, setIdDrawCount]);
+
+    // Calculate how many rows we need to render
+    const targetRowCount = useMemo(() => {
+        if (!currentPrize) return 1;
+
+        // If we are showing results, use the actual winner count
+        if (lastWinners.length > 0) return lastWinners.length;
+
+        // Otherwise use the selected count (controlled by UI)
+        return Math.max(1, Math.min(idDrawCount, remainingCount));
+    }, [currentPrize, idDrawCount, remainingCount, lastWinners.length]);
+
+    // State for multiple rows: grid of chars
+    const [rows, setRows] = useState<string[][]>([]);
+    // Locked count for each row (0-5)
+    // We use a single number if they sync, but let's use array for independence
+    const [lockedCounts, setLockedCounts] = useState<number[]>([]);
 
     const animationRef = useRef<number | null>(null);
     const lastClickTimeRef = useRef(0);
 
-    const winner = lastWinners.length > 0
-        ? participants.find(p => p.id === lastWinners[0])
-        : null;
+    // Initialize rows when targetCount changes AND we are not mid-animation
+    // Actually, we should sync rows state validation
+    useEffect(() => {
+        setRows(prev => {
+            if (prev.length === targetRowCount) return prev;
+            // Resize logic
+            const newRows = Array(targetRowCount).fill(null).map((_, i) => prev[i] || ['?', '?', '?', '?', '?']);
+            return newRows;
+        });
+        setLockedCounts(prev => {
+            if (prev.length === targetRowCount) return prev;
+            return Array(targetRowCount).fill(0); // Reset locks on resize
+        });
+    }, [targetRowCount]);
 
-    // The target ID to reveal
-    const targetId = useMemo(() => {
-        return winner
-            ? winner.employeeId.trim().slice(0, 5).toUpperCase().padEnd(5, '?')
-            : '?????';
-    }, [winner]);
 
-    // Current Prize Info
-    const currentPrize = prizes.find(p => p.id === currentPrizeId);
+    // Identify winners for each row
+    const rowTargets = useMemo(() => {
+        if (lastWinners.length === 0) return Array(targetRowCount).fill(null);
 
-    // Compute Character Pools for each position based on ELIGIBLE participants
-    // This ensures we only show characters that actually exist in that position for the remaining pool.
+        return lastWinners.map(id => {
+            const p = participants.find(x => x.id === id);
+            return p ? p.employeeId.trim().slice(0, 5).toUpperCase().padEnd(5, '?') : '?????';
+        });
+    }, [lastWinners, participants, targetRowCount]);
+
+    // Compute Character Pools (same as before)
     const charPools = useMemo(() => {
         const eligible = participants.filter(p => !p.isWinner && !p.disqualified);
-        // If no eligible (or only winner left), fallback to default to avoid empty pools
         const pool = eligible.length > 0 ? eligible : participants;
-
         const pools: string[][] = [[], [], [], [], []];
 
         pool.forEach(p => {
@@ -61,16 +100,12 @@ export default function IdDraw() {
             }
         });
 
-        // Fill empty pools with defaults if something weird happens
+        // Fill empty pools with defaults
         return pools.map((p) => {
-            // If pool is valid but too small for animation (e.g. only 1 char),
-            // we add standard chars to force visual spinning. 
-            // We try to guess if it's digit or letter based on what we have.
             if (p.length <= 1) {
                 const sample = p[0] || '0';
                 const isDigit = /\d/.test(sample);
                 const extras = isDigit ? '0123456789'.split('') : 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
-                // Combine unique
                 return Array.from(new Set([...p, ...extras]));
             }
             return p;
@@ -80,38 +115,44 @@ export default function IdDraw() {
 
     // Animation Loop
     useEffect(() => {
-        // We run the animation loop if we are drawing OR decelerating
-        // AND we haven't locked all 5 yet (or rather, until completeDraw is called)
         const shouldAnimate = isDrawing || isDecelerating;
 
         if (shouldAnimate) {
             const animate = () => {
-                setSlots(prev => {
-                    const newSlots = [...prev];
+                setRows(prevRows => {
+                    // Safety check
+                    if (prevRows.length !== targetRowCount) return prevRows;
+
+                    const newRows = prevRows.map(r => [...r]);
                     const now = Date.now();
                     let shouldPlaySound = false;
 
-                    // Update ONLY unrevealed slots
-                    for (let i = 0; i < 5; i++) {
-                        if (i >= lockedCount) {
-                            // Pick random from pool[i]
-                            const pool = charPools[i];
-                            newSlots[i] = pool[Math.floor(Math.random() * pool.length)];
-                            shouldPlaySound = true;
-                        } else if (winner) {
-                            // Ensure locked slots show the winner's char
-                            // (This corrects any race conditions where a frame might have slipped)
-                            newSlots[i] = targetId[i];
+                    // Update each row
+                    for (let r = 0; r < targetRowCount; r++) {
+                        const currentRow = newRows[r];
+                        const lockedCount = lockedCounts[r] || 0;
+                        const target = rowTargets[r]; // String or null
+
+                        for (let i = 0; i < 5; i++) {
+                            if (i >= lockedCount) {
+                                // Random Spin
+                                const pool = charPools[i];
+                                currentRow[i] = pool[Math.floor(Math.random() * pool.length)];
+                                // Only play sound occasionally to avoid chaos
+                                if (Math.random() > 0.8) shouldPlaySound = true;
+                            } else if (target) {
+                                // Locked: ensure target char
+                                currentRow[i] = target[i];
+                            }
                         }
                     }
 
-                    // Throttle click sound
                     if (shouldPlaySound && now - lastClickTimeRef.current > 100) {
                         playClick();
                         lastClickTimeRef.current = now;
                     }
 
-                    return newSlots;
+                    return newRows;
                 });
 
                 animationRef.current = requestAnimationFrame(animate);
@@ -119,112 +160,131 @@ export default function IdDraw() {
 
             animationRef.current = requestAnimationFrame(animate);
         } else {
-            // Not drawing/decelerating -> Stop animation
             if (animationRef.current) cancelAnimationFrame(animationRef.current);
 
-            // If we have a winner and are done, ensure correct display
-            if (winner) {
-                setSlots(targetId.split(''));
+            // Final sync for winners
+            if (lastWinners.length > 0) {
+                setRows(rowTargets.map(t => t ? t.split('') : ['?', '?', '?', '?', '?']));
             }
         }
 
         return () => {
             if (animationRef.current) cancelAnimationFrame(animationRef.current);
         };
-    }, [isDrawing, isDecelerating, lockedCount, charPools, winner, targetId, playClick]);
+    }, [isDrawing, isDecelerating, lockedCounts, charPools, rowTargets, targetRowCount, playClick, lastWinners.length]);
 
 
-    // Deceleration Logic (Reveal Timer)
+    // Deceleration Logic
     useEffect(() => {
-        if (isDecelerating && winner) {
-            // Start the reveal sequence
-            // lockedCount starts at 0.
-
+        if (isDecelerating && lastWinners.length > 0) {
+            // Start reveal for ALL rows simultaneously
             let count = 0;
-            setLockedCount(0); // Reset at start of deceleration
+            setLockedCounts(Array(targetRowCount).fill(0));
 
             const interval = setInterval(() => {
                 count++;
-                setLockedCount(count);
-                playClick(); // Extra click for lock feeling
+                setLockedCounts(Array(targetRowCount).fill(count)); // Sync reveal
+                playClick();
 
                 if (count >= 5) {
                     clearInterval(interval);
-
-                    // Delay the Win sound and Result popup by 1 second
                     setTimeout(() => {
                         playWin();
                         completeDraw();
                     }, 1000);
                 }
-            }, 1000); // 1 second per digit
+            }, 1000);
 
             return () => clearInterval(interval);
         } else if (isDrawing && !isDecelerating) {
-            // Just started drawing (spinning)
-            setLockedCount(0);
+            setLockedCounts(Array(targetRowCount).fill(0));
         }
-    }, [isDecelerating, winner, completeDraw, playWin, playClick, isDrawing]);
+    }, [isDecelerating, lastWinners.length, completeDraw, playWin, playClick, isDrawing, targetRowCount]);
+
 
     return (
-        <div className="flex flex-col items-center justify-center h-full w-full gap-12">
-            {/* Prize Header */}
-            <div className="text-center space-y-4">
-                <h2 className="text-3xl font-bold text-gray-700 drop-shadow-sm">
-                    {currentPrize ? `🏆 ${currentPrize.name}` : '準備抽獎'}
-                </h2>
-                {currentPrize && (
-                    <div className="text-gray-500 font-mono text-xl">
-                        剩餘名額: {currentPrize.count - currentPrize.winners.length}
-                    </div>
-                )}
-            </div>
+        <div className="h-full w-full overflow-y-auto scrollbar-thin scrollbar-thumb-sakura-pink/50 scrollbar-track-transparent">
+            <div className="min-h-full flex flex-col items-center justify-center gap-8 py-8 w-full max-w-7xl mx-auto">
+                {/* Header & Toggle */}
+                <div className="text-center space-y-4 shrink-0">
+                    <h2 className="text-3xl font-bold text-gray-700 drop-shadow-sm">
+                        {currentPrize ? `🏆 ${currentPrize.name}` : '準備抽獎'}
+                    </h2>
+                    {currentPrize && (
+                        <div className="flex flex-col items-center justify-center gap-4">
+                            <div className="text-gray-500 font-mono text-xl">
+                                剩餘名額: {currentPrize.count - currentPrize.winners.length}
+                            </div>
 
-            {/* Slots Container */}
-            <div className="flex gap-4 p-8 bg-white/20 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/30">
-                {slots.map((char, i) => (
-                    <div
-                        key={i}
-                        className="relative w-24 h-36 bg-gradient-to-b from-white to-gray-100 rounded-xl flex items-center justify-center shadow-inner border-2 border-sakura-pink overflow-hidden"
-                    >
-                        {/* Digit */}
-                        <motion.div
-                            key={i}
-                            className={`text-6xl font-black font-mono ${i < lockedCount ? 'text-sakura-dark' : 'text-gray-400'
-                                }`}
-                        >
-                            {char}
-                        </motion.div>
-
-                        {/* Locked Indicator */}
-                        {i < lockedCount && (
-                            <motion.div
-                                initial={{ opacity: 0, scale: 1.2 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                className="absolute inset-0 border-4 border-sakura-pink/50 rounded-xl shadow-[inset_0_0_20px_rgba(255,183,197,0.5)]"
-                            />
-                        )}
-                    </div>
-                ))}
-            </div>
-
-            {/* Status / Winner Name */}
-            <div className="h-24 flex items-center justify-center">
-                {!isDrawing && winner && lockedCount === 5 && (
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="text-center"
-                    >
-                        <div className="text-2xl text-white font-bold mb-2">恭喜中獎！</div>
-                        <div className="text-5xl font-black text-yellow-300 drop-shadow-lg">
-                            {winner.name} <span className="text-2xl opacity-80">({winner.department})</span>
+                            {/* Count Selector */}
+                            {!isDrawing && !isDecelerating && maxSelectable > 1 && (
+                                <div className="flex items-center gap-3 bg-white/50 px-4 py-2 rounded-2xl shadow-sm border border-white">
+                                    <span className="text-sm font-bold text-gray-500">一次抽出:</span>
+                                    <div className="flex bg-gray-200 rounded-full p-1 shadow-inner">
+                                        {Array.from({ length: maxSelectable }, (_, i) => i + 1).map(num => (
+                                            <button
+                                                key={num}
+                                                onClick={() => setIdDrawCount(num)}
+                                                className={`w-10 h-10 rounded-full text-lg font-black transition-all ${idDrawCount === num
+                                                        ? 'bg-sakura-pink text-white shadow-md scale-110'
+                                                        : 'text-gray-400 hover:text-gray-600 hover:bg-gray-300'
+                                                    }`}
+                                            >
+                                                {num}
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <span className="text-sm font-bold text-gray-500">人</span>
+                                </div>
+                            )}
                         </div>
-                    </motion.div>
-                )}
-            </div>
+                    )}
+                </div>
 
-            {/* Action Button Removed - Using Global Button */}
+                {/* Grid of Slots */}
+                <div className="flex flex-wrap gap-6 justify-center content-center w-full max-w-5xl">
+                    {rows.map((rowSlots, rIdx) => {
+                        // Check if this specific row is a winner (if result is out)
+                        const winnerId = lastWinners[rIdx];
+                        const winner = participants.find(p => p.id === winnerId);
+                        const isLocked = lockedCounts[rIdx] === 5;
+
+                        return (
+                            <div key={rIdx} className="flex flex-col items-center gap-2">
+                                <div className="flex gap-2 p-4 bg-white/20 backdrop-blur-lg rounded-2xl shadow-xl border border-white/30 transform transition-all hover:scale-105">
+                                    {rowSlots.map((char, i) => (
+                                        <div
+                                            key={i}
+                                            className="relative w-14 h-20 md:w-16 md:h-24 bg-gradient-to-b from-white to-gray-100 rounded-lg flex items-center justify-center shadow-inner border border-sakura-pink overflow-hidden"
+                                        >
+                                            <motion.div
+                                                key={`${char}-${i}`}
+                                                className={`text-4xl md:text-5xl font-black font-mono ${i < (lockedCounts[rIdx] || 0) ? 'text-sakura-dark' : 'text-gray-400'
+                                                    }`}
+                                            >
+                                                {char}
+                                            </motion.div>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {/* Winner Name Label */}
+                                <div className="h-8">
+                                    {winner && isLocked && (
+                                        <motion.div
+                                            initial={{ opacity: 0, y: -10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            className="text-lg font-bold text-white bg-sakura-dark/80 px-4 py-1 rounded-full backdrop-blur-md shadow-lg"
+                                        >
+                                            {winner.name}
+                                        </motion.div>
+                                    )}
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
         </div>
     );
 }

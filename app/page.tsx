@@ -59,6 +59,9 @@ export default function Home() {
                   // Batch Mode: Draw all remaining
                   const remaining = currentPrize.count - currentPrize.winners.length;
                   useLuckyDrawStore.getState().endDraw(remaining);
+                } else if (mode === 'ID_DRAW') {
+                  const count = useLuckyDrawStore.getState().idDrawCount;
+                  useLuckyDrawStore.getState().endDraw(count);
                 } else {
                   // Other Modes: Draw ONE at a time
                   useLuckyDrawStore.getState().endDraw(1);
@@ -79,7 +82,11 @@ export default function Home() {
           </button>
           {isDrawing && (
             <div className="text-center mt-2 text-sakura-dark font-bold text-xs bg-white/80 px-2 py-1 rounded-lg">
-              {mode === 'BATCH' ? "點擊停止抽出所有剩餘" : "點擊停止抽出一位"}
+              {(mode === 'BATCH')
+                ? "點擊停止抽出所有剩餘"
+                : mode === 'ID_DRAW'
+                  ? `點擊停止抽出 ${useLuckyDrawStore.getState().idDrawCount} 位`
+                  : "點擊停止抽出一位"}
             </div>
           )}
         </div>
