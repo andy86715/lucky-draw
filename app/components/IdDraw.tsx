@@ -59,9 +59,13 @@ export default function IdDraw() {
     const lastClickTimeRef = useRef(0);
 
     // Initialize rows when targetCount changes AND we are not mid-animation
-    // Actually, we should sync rows state validation
     useEffect(() => {
         setRows(prev => {
+            // If we are idle (not drawing, no results yet/cleared), always reset to question marks
+            if (lastWinners.length === 0 && !isDrawing && !isDecelerating) {
+                return Array(targetRowCount).fill(null).map(() => ['?', '?', '?', '?', '?']);
+            }
+
             if (prev.length === targetRowCount) return prev;
             // Resize logic
             const newRows = Array(targetRowCount).fill(null).map((_, i) => prev[i] || ['?', '?', '?', '?', '?']);
@@ -71,7 +75,8 @@ export default function IdDraw() {
             if (prev.length === targetRowCount) return prev;
             return Array(targetRowCount).fill(0); // Reset locks on resize
         });
-    }, [targetRowCount]);
+    }, [targetRowCount, lastWinners.length, isDrawing, isDecelerating]);
+
 
 
     // Identify winners for each row
@@ -207,27 +212,25 @@ export default function IdDraw() {
             <div className="min-h-full flex flex-col items-center justify-center gap-8 py-8 w-full max-w-7xl mx-auto">
                 {/* Header & Toggle */}
                 <div className="text-center space-y-4 shrink-0">
-                    <h2 className="text-3xl font-bold text-gray-700 drop-shadow-sm">
-                        {currentPrize ? `🏆 ${currentPrize.name}` : '準備抽獎'}
-                    </h2>
                     {currentPrize && (
-                        <div className="flex flex-col items-center justify-center gap-4">
-                            <div className="text-gray-500 font-mono text-xl">
+                        <div className="flex flex-wrap items-center justify-center gap-4 animate-fade-in-down">
+                            {/* Remaining Count */}
+                            <div className="text-gray-500 font-mono text-xl font-bold bg-white/80 px-4 py-2 rounded-2xl shadow-sm backdrop-blur-sm border border-white h-[58px] flex items-center">
                                 剩餘名額: {currentPrize.count - currentPrize.winners.length}
                             </div>
 
                             {/* Count Selector */}
                             {!isDrawing && !isDecelerating && maxSelectable > 1 && (
-                                <div className="flex items-center gap-3 bg-white/50 px-4 py-2 rounded-2xl shadow-sm border border-white">
+                                <div className="flex items-center gap-3 bg-white/50 px-4 py-2 rounded-2xl shadow-sm border border-white backdrop-blur-md h-[58px]">
                                     <span className="text-sm font-bold text-gray-500">一次抽出:</span>
-                                    <div className="flex bg-gray-200 rounded-full p-1 shadow-inner">
+                                    <div className="flex bg-gray-200 rounded-full p-1 shadow-inner overflow-x-auto max-w-[80vw]">
                                         {Array.from({ length: maxSelectable }, (_, i) => i + 1).map(num => (
                                             <button
                                                 key={num}
                                                 onClick={() => setIdDrawCount(num)}
-                                                className={`w-10 h-10 rounded-full text-lg font-black transition-all ${idDrawCount === num
-                                                        ? 'bg-sakura-pink text-white shadow-md scale-110'
-                                                        : 'text-gray-400 hover:text-gray-600 hover:bg-gray-300'
+                                                className={`w-10 h-10 rounded-full text-lg font-black transition-all shrink-0 ${idDrawCount === num
+                                                    ? 'bg-sakura-pink text-white shadow-md scale-110'
+                                                    : 'text-gray-400 hover:text-gray-600 hover:bg-gray-300'
                                                     }`}
                                             >
                                                 {num}
