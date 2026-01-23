@@ -64,48 +64,29 @@ export default function SlotMachine() {
                 }
 
                 playClick();
-                timeoutId = setTimeout(animate, 50);
+                // Ultra Fast Speed
+                timeoutId = setTimeout(animate, 15);
             };
             animate();
         }
-        // Mode 2: Decelerating
+        // Mode 2: Decelerating -> INSTANT STOP
         else if (isDecelerating) {
-            let currentDelay = 50;
-            const maxDelay = 600;
-
-            const slowDown = () => {
-                if (currentDelay < maxDelay) {
-                    if (targetCount === 1) {
-                        setSingleName(participants[Math.floor(Math.random() * participants.length)]?.name || '...');
-                    } else {
-                        const randoms = Array.from({ length: targetCount }).map(() =>
-                            participants[Math.floor(Math.random() * participants.length)]?.name || '...'
-                        );
-                        setDisplayNames(randoms);
-                    }
-
-                    playClick();
-                    currentDelay *= 1.15;
-                    timeoutId = setTimeout(slowDown, currentDelay);
+            // Stop Immediately
+            if (lastWinners.length > 0) {
+                if (lastWinners.length === 1) {
+                    const w = participants.find(p => p.id === lastWinners[0]);
+                    setSingleName(w ? w.name : 'Unknown');
                 } else {
-                    // STOP & REVEAL
-                    if (lastWinners.length > 0) {
-                        if (lastWinners.length === 1) {
-                            const w = participants.find(p => p.id === lastWinners[0]);
-                            setSingleName(w ? w.name : 'Unknown');
-                        } else {
-                            const winnerNames = lastWinners.map(id => participants.find(p => p.id === id)?.name || 'Unknown');
-                            setDisplayNames(winnerNames);
-                        }
-                        playWin();
-                    }
-
-                    timeoutId = setTimeout(() => {
-                        completeDraw();
-                    }, 1000);
+                    const winnerNames = lastWinners.map(id => participants.find(p => p.id === id)?.name || 'Unknown');
+                    setDisplayNames(winnerNames);
                 }
-            };
-            slowDown();
+                playWin();
+            }
+
+            // Delay before showing popup
+            setTimeout(() => {
+                completeDraw();
+            }, 2000);
         }
         // Mode 3: Idle / Result
         else {
@@ -214,7 +195,7 @@ export default function SlotMachine() {
                                     <AnimatePresence mode="popLayout">
                                         {(isDrawing || lastWinners.length > 0) ? displayNames.map((name, i) => (
                                             <motion.div
-                                                key={`${i}-${name}`} // Simple key
+                                                key={i} // Stable key for rapid updates
                                                 initial={{ opacity: 0, scale: 0.5 }}
                                                 animate={{ opacity: 1, scale: 1 }}
                                                 className="bg-white/90 border-2 border-sakura-pink/30 rounded-xl flex items-center justify-center shadow-sm aspect-[2.5/1] overflow-hidden"

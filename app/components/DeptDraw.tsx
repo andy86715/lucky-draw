@@ -90,24 +90,29 @@ export default function DeptDraw() {
 
         let animationFrameId: number;
         let lastTick = 0;
-        let delay = 100; // Starting delay
+        let delay = 20; // Ultra fast spin
         let stopping = false;
-        let stepsToStop = 0;
-        let finalSelection: string | null = null;
 
         const loop = (time: number) => {
             if (time - lastTick >= delay) {
                 lastTick = time;
 
-                // If not stopping yet, check if we should start stopping
+                // Stop Signal
                 if (!stopping && isDeceleratingRef.current) {
                     stopping = true;
-                    // Decide how many more clicks before stop (e.g., 10 to 15)
-                    stepsToStop = Math.floor(Math.random() * 5) + 10;
 
-                    // Pick the result NOW
-                    const final = availableDepts[Math.floor(Math.random() * availableDepts.length)];
-                    finalSelection = final;
+                    // Pick Final Result Immediately
+                    const finalDept = availableDepts[Math.floor(Math.random() * availableDepts.length)];
+                    setDisplayDept(finalDept);
+                    setSelectedDept(finalDept);
+                    playClick(); // Final click
+
+                    // Delay before showing candidates (Stage 2)
+                    setTimeout(() => {
+                        completeDraw();
+                        setStage(2); // Go to "Dept Selected"
+                    }, 2000); // 2s delay (matching SlotMachine request)
+                    return; // Stop loop
                 }
 
                 if (!stopping) {
@@ -115,39 +120,11 @@ export default function DeptDraw() {
                     const randomDept = availableDepts[Math.floor(Math.random() * availableDepts.length)];
                     setDisplayDept(randomDept || '無部門');
                     playClick();
-                } else {
-                    // Decelerating
-                    if (stepsToStop > 0) {
-                        stepsToStop--;
-                        // Increase delay to slow down (Exponential-ish)
-                        delay += 30; // 100 -> 130 -> 160 ...
-
-                        // Show random (or maybe toggle towards final? random is fine until last)
-                        // Actually, purely random is confusing if it lands on target differently.
-                        // Let's just keep random until the very last frame? 
-                        // Or ensure the LAST one is the target.
-                        if (stepsToStop === 0) {
-                            // STOP!
-                            // Pick a final dept (randomly)
-                            const finalDept = availableDepts[Math.floor(Math.random() * availableDepts.length)];
-                            setDisplayDept(finalDept);
-                            setSelectedDept(finalDept);
-
-                            // Check if this dept has only 1 candidate
-                            // Removed auto-win logic to allow visual confirmation in Stage 2
-
-                            completeDraw();
-                            setStage(2); // Go to "Dept Selected"
-                            return;
-                        } else {
-                            const randomDept = availableDepts[Math.floor(Math.random() * availableDepts.length)];
-                            setDisplayDept(randomDept || '無部門');
-                            playClick();
-                        }
-                    }
                 }
             }
-            animationFrameId = requestAnimationFrame(loop);
+            if (!stopping) {
+                animationFrameId = requestAnimationFrame(loop);
+            }
         };
 
         animationFrameId = requestAnimationFrame(loop);
