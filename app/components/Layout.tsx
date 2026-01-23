@@ -65,7 +65,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <footer className="fixed bottom-4 right-4 z-10 opacity-60 hover:opacity-100 transition-opacity">
                 <a href="https://github.com/andy86715/lucky-draw" target="_blank" rel="noreferrer" className="flex items-center gap-2 text-xs text-warm-text bg-white/50 px-3 py-1 rounded-full backdrop-blur-sm">
                     <Github size={14} />
-                    <span>Open Source</span>
+                    <span>GitHub</span>
                 </a>
             </footer>
         </div>
