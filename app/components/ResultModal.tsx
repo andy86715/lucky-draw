@@ -16,12 +16,28 @@ export default function ResultModal() {
     } = useLuckyDrawStore();
     const { playCongrats } = useSound();
 
+    // Random Phrase Logic
+    const PHRASES = [
+        "平安吉祥", "歡喜自在", "我為你祝福", "有佛法就有辦法",
+        "不忘初心", "以忍為力", "做好事・說好話・存好心",
+        "福慧雙修", "功德圓滿", "萬事如意", "六時吉祥", "處世無畏・和平共存",
+        "仁和安康・富樂吉祥", "花開四季・耕耘心田", "雲水自在・祥和歡喜"
+    ];
+    const [randomPhrase, setRandomPhrase] = useState("吉祥如意");
+
     const [confirmData, setConfirmData] = useState<{ winnerIds: string[]; winnerNames: string[] } | null>(null);
     const [selectedWinners, setSelectedWinners] = useState<Set<string>>(new Set());
 
     const show = lastWinners.length > 0 && !isDecelerating;
     const currentPrize = prizes.find(p => p.id === currentPrizeId);
     const winners = participants.filter(p => lastWinners.includes(p.id));
+
+    // Update phrase when showing
+    useEffect(() => {
+        if (show) {
+            setRandomPhrase(PHRASES[Math.floor(Math.random() * PHRASES.length)]);
+        }
+    }, [show]);
 
     useEffect(() => {
         if (show) {
@@ -121,7 +137,7 @@ export default function ResultModal() {
                         <div className="flex flex-col items-center justify-center">
                             <img src="/buddha.svg" className="w-16 h-16 mb-2" alt="Buddha" />
                             <div className="text-sakura-dark text-4xl font-black drop-shadow-md">
-                                🎉 吉祥如意 🎉
+                                🎉 {randomPhrase} 🎉
                             </div>
                             <div className="text-sm text-gray-500 font-bold mt-1">恭喜得獎！</div>
                         </div>
