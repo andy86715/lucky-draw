@@ -35,14 +35,14 @@ export default function ResultModal() {
                     angle: 60,
                     spread: 55,
                     origin: { x: 0 },
-                    colors: ['#FFB7C5', '#89CFF0', '#FFFDD0']
+                    colors: ['#FFD700', '#FFA500', '#E9967A']
                 });
                 confetti({
                     particleCount: 2,
                     angle: 120,
                     spread: 55,
                     origin: { x: 1 },
-                    colors: ['#FFB7C5', '#89CFF0', '#FFFDD0']
+                    colors: ['#FFD700', '#FFA500', '#E9967A']
                 });
 
                 if (Date.now() < end) {
@@ -118,8 +118,12 @@ export default function ResultModal() {
                 >
                     <div className="shrink-0 mb-4">
                         <h2 className="text-xl font-bold text-gray-400 mb-1 uppercase tracking-widest">{currentPrize.name}</h2>
-                        <div className="text-sakura-dark text-4xl font-black drop-shadow-md">
-                            🎉 CONGRATULATIONS 🎉
+                        <div className="flex flex-col items-center justify-center">
+                            <img src="/buddha.svg" className="w-16 h-16 mb-2" alt="Buddha" />
+                            <div className="text-sakura-dark text-4xl font-black drop-shadow-md">
+                                🎉 吉祥如意 🎉
+                            </div>
+                            <div className="text-sm text-gray-500 font-bold mt-1">恭喜得獎！</div>
                         </div>
                     </div>
 
@@ -138,7 +142,7 @@ export default function ResultModal() {
                                     {/* Checkbox UI */}
                                     <div className={`
                                         w-6 h-6 rounded-md border-2 flex items-center justify-center shrink-0 transition-colors
-                                        ${selectedWinners.has(w.id) ? 'bg-red-500 border-red-500 text-white' : 'border-gray-300 bg-white'}
+                                        ${selectedWinners.has(w.id) ? 'bg-orange-500 border-orange-500 text-white' : 'border-gray-300 bg-white'}
                                     `}>
                                         {selectedWinners.has(w.id) && <Check size={16} strokeWidth={4} />}
                                     </div>

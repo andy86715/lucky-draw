@@ -255,8 +255,8 @@ export default function DeptDraw() {
                 {/* LEFT: DEPT SLOT */}
                 <div className="flex flex-col items-center gap-4 shrink-0 justify-center">
                     <div className="text-xl font-bold text-sakura-dark">部門</div>
-                    <div className="w-64 h-64 bg-white rounded-3xl shadow-xl border-4 border-sakura-pink/50 flex items-center justify-center overflow-hidden relative">
-                        <div className="absolute inset-0 bg-gradient-to-br from-white to-gray-100" />
+                    <div className="w-64 h-64 bg-white rounded-3xl shadow-xl border-4 border-amber-400 flex items-center justify-center overflow-hidden relative">
+                        <div className="absolute inset-0 bg-gradient-to-br from-white to-[#FFF8DC]" />
                         <motion.div
                             key={displayDept}
                             // Only animate pop when locked (Stage 2+)

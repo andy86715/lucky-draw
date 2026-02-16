@@ -208,7 +208,7 @@ export default function IdDraw() {
 
 
     return (
-        <div className="h-full w-full overflow-y-auto scrollbar-thin scrollbar-thumb-sakura-pink/50 scrollbar-track-transparent">
+        <div className="h-full w-full overflow-y-auto scrollbar-thin scrollbar-thumb-amber-300 scrollbar-track-transparent">
             <div className="min-h-full flex flex-col items-center justify-center gap-8 py-8 w-full max-w-7xl mx-auto">
                 {/* Header & Toggle */}
                 <div className="text-center space-y-4 shrink-0">
@@ -229,7 +229,7 @@ export default function IdDraw() {
                                                 key={num}
                                                 onClick={() => setIdDrawCount(num)}
                                                 className={`w-10 h-10 rounded-full text-lg font-black transition-all shrink-0 ${idDrawCount === num
-                                                    ? 'bg-sakura-pink text-white shadow-md scale-110'
+                                                    ? 'bg-monk-robe text-white shadow-md scale-110'
                                                     : 'text-gray-400 hover:text-gray-600 hover:bg-gray-300'
                                                     }`}
                                             >
@@ -258,7 +258,7 @@ export default function IdDraw() {
                                     {rowSlots.map((char, i) => (
                                         <div
                                             key={i}
-                                            className="relative w-14 h-20 md:w-16 md:h-24 bg-gradient-to-b from-white to-gray-100 rounded-lg flex items-center justify-center shadow-inner border border-sakura-pink overflow-hidden"
+                                            className="relative w-14 h-20 md:w-16 md:h-24 bg-gradient-to-b from-white to-[#FFF8DC] rounded-lg flex items-center justify-center shadow-inner border border-amber-300 overflow-hidden"
                                         >
                                             <motion.div
                                                 key={`${char}-${i}`}

@@ -1,13 +1,15 @@
 @import "tailwindcss";
 
 @theme {
-  --color-sakura-pink: #FFB7C5;
-  --color-sakura-light: #FFF0F5; /* LavenderBlush, very light pink for bg */
-  --color-sakura-dark: #FB6F92;
-  --color-baby-blue: #89CFF0;
-  --color-cream-yellow: #FFFDD0;
-  --color-warm-text: #333333;
-  --color-accent-gold: #FFD700;
+  /* Buddha's Light Youth Theme Colors */
+  --color-sakura-pink: #E9967A; /* Dark Salmon (Lotus Pink replacement) */
+  --color-sakura-light: #FFF8DC; /* Cornsilk (Warm parchment background) */
+  --color-sakura-dark: #8B4513; /* SaddleBrown (Wood/Earth tone) */
+  --color-baby-blue: #ADD8E6; /* Light Blue (Sky/Cloud) */
+  --color-cream-yellow: #FFFFE0; /* Light Yellow (Light) */
+  --color-warm-text: #4A3728; /* Dark Brown (Text) */
+  --color-accent-gold: #FFD700; /* Gold (Buddha/Dharma) */
+  --color-monk-robe: #FFA500; /* Orange (Monk's Robe) */
   
   --font-sans: var(--font-geist-sans), system-ui, sans-serif;
 }

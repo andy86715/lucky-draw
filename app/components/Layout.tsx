@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
     // Floating icons for background decoration
-    const icons = ['🍼', '👶', '🧸', '💖', '🏥', '🕊️'];
+    const icons = ['🪷', '☸️', '🕍', '🏮', '✨', '🧘'];
     const [floatingElements, setFloatingElements] = useState<{ x: number, y: number, duration: number, icon: string }[]>([]);
 
     useEffect(() => {
@@ -53,9 +53,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
             <header className="relative z-10 py-6 text-center">
                 <h1 className="text-4xl md:text-5xl font-extrabold text-sakura-dark drop-shadow-sm tracking-tight">
-                    🌸 亞東婦產部 2026 尾牙抽獎 🌸
+                    🪷 佛光青年 2026 新春抽獎 🪷
                 </h1>
-                <p className="text-sakura-pink font-bold mt-2 text-xl">OB/GYN Department Lucky Draw</p>
+                <p className="text-sakura-pink font-bold mt-2 text-xl">Buddha's Light Youth Lucky Draw</p>
             </header>
 
             <main className="relative z-10 min-h-[calc(100vh-200px)] flex flex-col items-center justify-center p-4">

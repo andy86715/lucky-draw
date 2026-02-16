@@ -13,7 +13,7 @@ export default function Roulette() {
     const lastSectionIndex = useRef<number>(-1); // Track last section for click sound
 
     // Config
-    const COLORS = ['#FFAEBC', '#A0E7E5', '#B4F8C8', '#FBE7C6', '#FF9AA2', '#E2F0CB'];
+    const COLORS = ['#FFD700', '#FFA500', '#E9967A', '#F0E68C', '#DEB887', '#FFE4B5'];
     const eligible = participants.filter(p => !p.isWinner && !p.disqualified);
     const [slices, setSlices] = useState<{ id: string, name: string, color: string }[]>([]);
 
@@ -142,7 +142,7 @@ export default function Roulette() {
         <div className="relative w-[500px] h-[500px] flex items-center justify-center">
             {/* Pointer */}
             <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-6 z-20">
-                <div className="w-0 h-0 border-l-[20px] border-l-transparent border-r-[20px] border-r-transparent border-t-[40px] border-t-red-500 drop-shadow-md" />
+                <div className="w-0 h-0 border-l-[20px] border-l-transparent border-r-[20px] border-r-transparent border-t-[40px] border-t-amber-500 drop-shadow-md" />
             </div>
 
             <motion.div
@@ -187,8 +187,8 @@ export default function Roulette() {
             </motion.div>
 
             {/* Center Boss */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 bg-white rounded-full shadow-inner border-4 border-gray-100 flex items-center justify-center font-bold text-sakura-pink text-xl">
-                LUCKY
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 bg-white rounded-full shadow-inner border-4 border-gray-100 flex items-center justify-center font-bold text-sakura-pink text-3xl">
+                平安
             </div>
         </div>
     );

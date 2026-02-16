@@ -148,7 +148,7 @@ export default function SlotMachine() {
                                         className={clsx(
                                             "w-10 h-10 rounded-full text-lg font-black transition-all shrink-0",
                                             slotDrawCount === num
-                                                ? "bg-sakura-pink text-white shadow-md scale-110"
+                                                ? "bg-monk-robe text-white shadow-md scale-110"
                                                 : "text-gray-400 hover:text-gray-600 hover:bg-gray-300"
                                         )}
                                     >
@@ -163,7 +163,7 @@ export default function SlotMachine() {
             )}
 
             {/* Machine Body */}
-            <div className="bg-gradient-to-br from-sakura-pink to-sakura-dark p-6 rounded-[3rem] shadow-[0_20px_50px_rgba(0,0,0,0.3)] border-b-[12px] border-r-[12px] border-sakura-dark/50 relative max-w-4xl w-full transition-all duration-500">
+            <div className="bg-gradient-to-br from-[#d4a017] to-[#8b4513] p-6 rounded-[3rem] shadow-[0_20px_50px_rgba(0,0,0,0.3)] border-b-[12px] border-r-[12px] border-[#5d2906]/50 relative max-w-4xl w-full transition-all duration-500">
 
                 {/* Decorative Top Lights */}
                 <div className="flex justify-center gap-4 mb-6">
@@ -175,7 +175,7 @@ export default function SlotMachine() {
                 {/* Title */}
                 <div className="text-center mb-4">
                     <span className="bg-black/20 text-white px-6 py-1 rounded-full font-black tracking-[0.2em] text-sm backdrop-blur-sm">
-                        {showGrid ? 'MULTI-SLOT' : 'LUCKY SLOT'}
+                        {showGrid ? '六根清淨' : '萬事如意'}
                     </span>
                 </div>
 
